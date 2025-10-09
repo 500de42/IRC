@@ -5,12 +5,12 @@ int Server::createServer()
     this->srv = socket(AF_INET, SOCK_STREAM, 0);
     if (this->srv < 0)
         return 1;
-
+    int opt = 1;
     std::memset(&serv_addr, 0, sizeof(serv_addr));
     this->serv_addr.sin_port = htons(6667);
     this->serv_addr.sin_family = AF_INET;
     this->serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-
+    setsockopt(srv, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
     if (bind(srv, (struct sockaddr *)&serv_addr, sizeof(serv_addr)))
     {
         std::cerr << "Bind error" << std::endl;
@@ -18,14 +18,17 @@ int Server::createServer()
         return 1;
     }
     std::cout << "Bind ok" << std::endl;
-    close(srv);
     if (listen(srv, 10))
     {
         std::cerr << "Listen error" << std::endl;
         close(srv);
         return 1;
     }
-    // this->clients.push_back()
+    struct pollfd server_poll;
+    server_poll.fd = srv;
+    server_poll.events = POLLIN;
+    this->fds.push_back(server_poll);
+    return 0;
 }
 
 Client Client::createClient()
