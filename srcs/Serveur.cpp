@@ -1,4 +1,5 @@
-#include "../includes/IRC.hpp"
+#include "../includes/Serveur.hpp"
+#include "../includes/Client.hpp"
 
 int Server::createServer()
 {
@@ -24,21 +25,36 @@ int Server::createServer()
         close(srv);
         return 1;
     }
-    struct pollfd server_poll;
-    server_poll.fd = srv;
-    server_poll.events = POLLIN;
-    this->fds.push_back(server_poll);
+    struct pollfd server_poll[10 + 1];
+    server_poll[0].fd = srv;
+    server_poll[0].events = POLLIN;
+    this->fds.push_back(server_poll[0]);
+    for (int i = 1; i <= 11; i++)
+    {
+        server_poll[i].fd = -1;
+        this->fds.push_back(server_poll[i]);
+    }
     return 0;
 }
 
-Client Client::createClient()
+
+std::vector<Client> &Server::getClients()
 {
-    this->cli = socket(AF_INET, SOCK_STREAM, 0);
-    if (this->cli < 0)
-        return 0;
-    std::memset(&cli_addr, 0, sizeof(cli_addr));
-    this->cli_addr.sin_port = htons(6667);
-    this->cli_addr.sin_family = AF_INET;
-    this->cli_addr.sin_addr.s_addr = inet_addr("127.0.1.0");
-    return *this;
+    return clients;
+}
+
+struct sockaddr_in &Server::getSockaddr()
+{
+    return this->serv_addr;
+}
+
+void Server::closeAllSockets()
+{
+    for (int i = 0; i <= 11; i++)
+    {
+        if(this->getClients()[i].getFd() > 0)
+            close(this->getClients()[i].getFd());
+    }
+    if (this->srv)
+        close(this->srv);
 }

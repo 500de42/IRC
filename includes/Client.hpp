@@ -13,27 +13,18 @@ class Client
     private:
         struct sockaddr_in cli_addr;
         std::string ipAddress;
-        int cli = -1;
+        int cliSocket = -1;
+        int servSocket = -1;
+        std::string line;
         std::string nickname;
         std::string username;
-        std::string buffer;
+        char buffer[512];
     public:
         std::string getIpAddr();
         int getFd();
+        int getServsocket();
+        int getSocket();
+        void setServsocket(int nb);
         Client createClient();
+        Client();
 };
-
-class Server
-{
-    private:
-        struct sockaddr_in serv_addr;
-        int srv = -1;
-        static bool Signal;
-        std::vector<Client> clients;
-        std::vector<pollfd> fds;
-    public:
-        int createServer();
-        std::vector<pollfd> getFds();
-};
-
-std::
