@@ -7,6 +7,7 @@
 #include <string>
 #include <sstream>
 #include <poll.h>
+#include <cstdbool>
 
 class Client
 {
@@ -18,13 +19,26 @@ class Client
         std::string line;
         std::string nickname;
         std::string username;
-        char buffer[512];
+        char Buffer[512];
+        Client();
     public:
+        //      GET     //
+
         std::string getIpAddr();
         int getFd();
         int getServsocket();
         int getSocket();
+        char *getBuffer();
+        struct sockaddr_in &getSockaddr();
+
+        //      SET     //
+
         void setServsocket(int nb);
-        Client createClient();
-        Client();
+        void setCliSocket(int nb);
+        void setBuffer(char *buffer);
+
+        //              //
+
+        Client(bool o);
+
 };

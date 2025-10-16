@@ -8,6 +8,7 @@ class Server
         static bool Signal;
         std::vector<Client> clients;
         std::vector<pollfd> fds;
+        int i = 1;
         char buffer[512];
     public:
         int createServer();

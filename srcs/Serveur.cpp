@@ -25,15 +25,11 @@ int Server::createServer()
         close(srv);
         return 1;
     }
-    struct pollfd server_poll[10 + 1];
-    server_poll[0].fd = srv;
-    server_poll[0].events = POLLIN;
-    this->fds.push_back(server_poll[0]);
-    for (int i = 1; i <= 11; i++)
-    {
-        server_poll[i].fd = -1;
-        this->fds.push_back(server_poll[i]);
-    }
+    struct pollfd server_poll;
+    server_poll.fd = srv;
+    server_poll.events = POLLIN;
+    this->fds.push_back(server_poll);
+    this->fds.push_back(server_poll);
     return 0;
 }
 
