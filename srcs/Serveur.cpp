@@ -54,3 +54,85 @@ void Server::closeAllSockets()
     if (this->srv)
         close(this->srv);
 }
+
+std::vector<std::string> extractMessageForUser(char *tmp)
+{
+    if (!tmp)
+        throw("");
+    std::stringstream ss(tmp);
+    std::string l;
+    std::vector<std::string> tab;
+    while (ss >> l)
+        tab.push_back(l);
+    if (tab.size() != 4)
+        throw "";
+    return (tab);
+}
+
+std::string extractMessage(char *tmp)
+{
+    std::string line(tmp);
+    std::string extract;
+    size_t begin = 0, end = 0;
+
+    if (!tmp || line.size() > 8)
+        return "";
+    begin = line.find_first_of("<", 6);
+    if (begin == 0)
+    {
+        end = line.find_first_of(">", begin);
+        if (end != 0)
+        extract = line.substr(begin, end);
+        return extract;
+    }
+    return "";
+}
+
+bool Server::checkDoubleName(const char *name)
+{
+    if (!name)
+        return false;
+    for(int i = 0; i < this->getClients().size(); i++)
+    {
+        if (name == this->getClients()[i].getUsername())
+            return false;
+    }
+    return true;
+}
+
+bool parsingSetUser(std::vector<std::string> &tab)
+{
+    
+}
+
+void setUserAndNick(Client &client, Server &server)
+{
+    char *buff = client.getBuffer();
+    std::string line;
+    std::vector<std::string> mess;
+
+    if (!strncmp(buff, "USER", 5))
+    {
+        if (client.getUsername().empty())
+        {            
+            mess = extractMessageForUser(buff);
+            if (server.checkDoubleName(mess[0].c_str()))
+                client.setUsername(line.c_str());
+            else
+                // ERR_ALREADYREGISTRED();
+                std::cout << "\n";//erreur a ecrire
+        }
+        else
+        {
+            std::cout << "\n";//erreur a ecrire
+        }
+    }    
+    else if (!strncmp(buff, "NICK", 5))
+    {
+        line = extractMessage(buff);
+        if (!line.empty())
+            client.setNickname(line.c_str());
+    }
+    if (!client.getNickname().empty() && !client.getUsername().empty())
+        client.onRegisted();
+}

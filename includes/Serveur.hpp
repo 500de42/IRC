@@ -16,4 +16,10 @@ class Server
         std::vector<pollfd> &getFds();
         std::vector<Client> &getClients();
         void closeAllSockets();
+        void registerClient();
+        bool checkDoubleName(const char *name);
 };
+
+std::string extractMessage(char *tmp);
+std::vector<std::string> extractMessageForUser(char *tmp);
+void setUserAndNick(Client &client, Server &server);

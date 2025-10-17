@@ -16,11 +16,12 @@ class Client
         std::string ipAddress;
         int cliSocket = -1;
         int servSocket = -1;
-        std::string line;
         std::string nickname;
         std::string username;
-        char Buffer[512];
-        Client();
+        std::string realname;
+        char *Buffer;
+        bool isRegistred = false;
+
     public:
         //      GET     //
 
@@ -28,17 +29,25 @@ class Client
         int getFd();
         int getServsocket();
         int getSocket();
-        char *getBuffer();
+        char * getBuffer();
         struct sockaddr_in &getSockaddr();
+        bool getRegister();
+        std::string &getNickname();
+        std::string &getUsername();
+        std::string &getRealname();
 
         //      SET     //
 
         void setServsocket(int nb);
         void setCliSocket(int nb);
         void setBuffer(char *buffer);
-
+        void setNickname(const char *name);
+        void setUsername(const char *name);
+        void setRealname(const char *name);
+        void onRegisted();
+        Client();
         //              //
 
         Client(bool o);
-
+        Client &operator=(const Client &cpy);
 };

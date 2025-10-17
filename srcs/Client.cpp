@@ -17,6 +17,13 @@ Client::Client(bool o)
             throw("Error socket init ");
     }
 }
+Client::Client()
+{
+    std::memset(&cli_addr, 0, sizeof(cli_addr));
+    this->cli_addr.sin_port = htons(6667);
+    this->cli_addr.sin_family = AF_INET;
+    this->cli_addr.sin_addr.s_addr = inet_addr("127.0.1.0");
+}
 
 int Client::getServsocket()
 {
@@ -48,7 +55,28 @@ char *Client::getBuffer()
     return Buffer;
 }
 
-// void Client::setBuffer(char *buffer)
-// {
-//     Buffer = buffer;
-// }
+Client &Client::operator=(const Client &cpy)
+{
+    if (this != &cpy) 
+    {
+        nickname = cpy.nickname;
+        username = cpy.username;
+        isRegistred = cpy.isRegistred;
+    }
+    return *this;
+}
+
+std::string &Client::getNickname()
+{
+    return this->nickname;
+}
+
+std::string &Client::getUsername()
+{
+    return this->username;
+}
+
+void Client::onRegisted()
+{
+    this->isRegistred = true;
+}
