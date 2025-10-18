@@ -8,7 +8,7 @@
 #include <sstream>
 #include <poll.h>
 #include <cstdbool>
-
+#include <cerrno>
 class Client
 {
     private:
@@ -48,6 +48,8 @@ class Client
         Client();
         //              //
 
-        Client(bool o);
+        // Client(bool o);
         Client &operator=(const Client &cpy);
+        bool extractMessageForUser(char *tmp);
+        void sendMessage(const char *buffer);
 };
