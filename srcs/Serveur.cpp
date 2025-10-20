@@ -67,10 +67,41 @@ bool Server::checkDoubleName(const char *name)
     return true;
 }
 
-void Server::sendMessage(const char *buffer, Client client)
+void Server::sendMessage(std::string buffer, Client client)
 {
-    if (send(client.getServsocket(), buffer, sizeof(buffer), 0) == -1)
+
+    if (send(client.getServsocket(), buffer.c_str(), sizeof(buffer), 0) == -1)
     {
         std::cout << "Error sending message:" << strerror(errno) << "\n";
     }
+}
+
+void Server::Channel::setTopic(const std::string &name)
+{
+    this->topic = name;
+}
+
+void Server::Channel::setFirst(Client &client)
+{
+    this->First = client;
+}
+
+void Server::Channel::setK(bool &active)
+{
+    k = active;
+}
+
+void Server::Channel::setL(bool &active)
+{
+    l = active;
+}
+
+void Server::Channel::setI(bool &active)
+{
+    i = active;
+}
+
+void Server::Channel::setT(bool &active)
+{
+    t = active;
 }

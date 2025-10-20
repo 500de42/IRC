@@ -41,20 +41,36 @@ int main()
                         setUserAndNick(tmp, server);
                     }
                     else
-                    {
-                        if (buff == "KICK")
+                    {//METTRE EN PLACE POINTEUR SUR METHODES
+                        if (!strncmp(buff, "JOIN ", 5))
+                        {
+                            
+                        }
+                        else if (!strncmp(buff, "KICK ", 5))
                         {
 
                         }
-                        else if (buff == "INVITE")
+                        else if (!strncmp(buff, "INVITE ", 7))
                         {
 
                         }
-                        else if (buff == "TOPIC")
+                        else if (!strncmp(buff, "TOPIC ", 6))
                         {
 
                         }
-                        else if (buff == "MODE")
+                        else if (!strncmp(buff, "MODE ", 5))
+                        {
+
+                        }
+                        else if (!strncmp(buff, "USER ", 5))
+                        {
+                            server.sendMessage("462" + (std::string)buff + ":You may not reregister\r\n", tmp);
+                        }
+                        else if (!strncmp(buff, "NICK ", 5))
+                        {
+
+                        }
+                        else
                         {
 
                         }

@@ -1,4 +1,5 @@
 #include <iostream>
+#pragma once
 #include <vector>
 #include <cstring>
 #include <unistd.h>
@@ -9,6 +10,9 @@
 #include <poll.h>
 #include <cstdbool>
 #include <cerrno>
+#include <Channel.hpp>
+
+
 class Client
 {
     private:
@@ -21,6 +25,7 @@ class Client
         std::string realname;
         char *Buffer;
         bool isRegistred = false;
+        std::vector<Server::Channel> channels;
 
     public:
         //      GET     //
@@ -35,6 +40,7 @@ class Client
         std::string &getNickname();
         std::string &getUsername();
         std::string &getRealname();
+        std::vector<Server::Channel> &getChannels();
 
         //      SET     //
 

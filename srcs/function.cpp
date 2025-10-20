@@ -36,12 +36,20 @@ bool extractAndSetMessageForUser(char *tmp, Client &client, Server &server)
         tab[4] = l;
     }
     if (prohibidedCharacter(tab[1]) || prohibidedCharacter(tab[4]))
+    {
+        server.sendMessage("461" + tab[1] + ":Not enough parameters\r\n", client);   
         return false;
-    if (server.checkDoubleName(tab[1].c_str()))
+    }
+    // if (server.checkDoubleName(tab[1].c_str()))
+    if (client.getUsername().empty())
+    {
         client.setUsername(tab[1].c_str());
+        client.setRealname(tab[4].c_str());
+    }
     else
     {
-
+        server.sendMessage("462" + tab[1] + ":You may not reregister\r\n", client);
+        return false;
     }
     return (true);
 }
@@ -88,32 +96,46 @@ void setUserAndNick(Client &client, Server &server)
     std::string line;
     std::vector<std::string> mess;
 
+    if (strncmp(buff, "USER", 4) && strncmp(buff, "NICK", 4))
+    {
+        server.sendMessage("451 " + (std::string)buff + " :You have not registered\r\n", client); return;
+    }
     if (!strncmp(buff, "USER", 4))
     {
-        if (client.getUsername().empty())
-        {            
+        if (client.getUsername().empty())          
             if (!extractAndSetMessageForUser(buff, client, server))
             {    
                 // ERR_ALREADYREGISTRED();
-                server.sendMessage("\n\r", client);//erreur a ecrire et envoyer au client
+                server.sendMessage("\r\n", client);//erreur a ecrire et envoyer au client
             }
-        }  
         else
-        {
-            server.sendMessage("\n\r", client);//erreur a ecrire et envoyer au client
-        }
+            server.sendMessage("\r\n", client);//erreur a ecrire et envoyer au client
     }
     else if (!strncmp(buff, "NICK", 4))
     {
         line = extractMessage(buff + 4);
         if (!line.empty() && !prohibidedCharacter(line))
-            client.setNickname(line.c_str());
+        {
+            if (server.checkDoubleName(line.c_str()))
+                client.setNickname(line.c_str());
+            else
+            {
+                server.sendMessage("462" + line + ":You may not reregister\r\n", client);
+                return ;
+            }
+        }
+        else
+        {
+            server.sendMessage("432" + line + ":Erroneous nickname\r\n", client);
+            return;
+        }
     }
     if (!client.getNickname().empty() && !client.getUsername().empty())
-        client.onRegisted();
-    else
     {
-        server.sendMessage("\n\r", client);
+        client.onRegisted();
+        server.sendMessage("001" + client.getNickname() +  " :Welcome to the Internet Relay Network " + client.getNickname() + "!" + client.getUsername() + "@127.0.0.1", client);
     }
+    else
+        server.sendMessage("\r\n", client);
 }
 
