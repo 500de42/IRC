@@ -31,16 +31,21 @@ class Server
 class Server::Channel
 {
     private:
+    
         Client First;
         std::vector<Client> members;
         std::string topic;
+        std::string name;
+        std::string Password;
+        bool activePassword = false;
         bool k = false;
         bool l = false;
         bool t = false;
         bool i = false;
-        std::map<std::string, bool> Password;
         int membersLimit = 0;
+
     public:
+
     //      GET         //
 
         bool &getK();
@@ -48,6 +53,7 @@ class Server::Channel
         bool &getT();
         bool &getL();
         std::string &getTopic();
+        std::string &getName();
         std::map<std::string, bool> &getPass();
         std::vector<Client> &getMembers();
     
@@ -58,7 +64,9 @@ class Server::Channel
         void setI(bool &active);
         void setL(bool &active);
         void setTopic(const std::string &name);
+        void setName(const std::string &name);
         void setFirst(Client &client);
+        void setPasssword(const std::string &name);
 
 };
 

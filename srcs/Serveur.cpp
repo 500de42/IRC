@@ -75,33 +75,3 @@ void Server::sendMessage(std::string buffer, Client client)
         std::cout << "Error sending message:" << strerror(errno) << "\n";
     }
 }
-
-void Server::Channel::setTopic(const std::string &name)
-{
-    this->topic = name;
-}
-
-void Server::Channel::setFirst(Client &client)
-{
-    this->First = client;
-}
-
-void Server::Channel::setK(bool &active)
-{
-    k = active;
-}
-
-void Server::Channel::setL(bool &active)
-{
-    l = active;
-}
-
-void Server::Channel::setI(bool &active)
-{
-    i = active;
-}
-
-void Server::Channel::setT(bool &active)
-{
-    t = active;
-}

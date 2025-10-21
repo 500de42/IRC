@@ -1,8 +1,30 @@
 #include "../includes/Serveur.hpp"
 #include "../includes/Client.hpp"
 
+bool searchChannelMatch(Server server, std::string name)
+{
+    for(int i = 0; i < server.getChannels().size(); i++)
+    {
+        if (name == server.getChannels()[i].getName())
+            return true;
+    }
+    return false;
+}
+
+Server::Channel &ChannelMatch(Server server, std::string name)
+{
+    for(int i = 0; i < server.getChannels().size(); i++)
+    {
+        if (name == server.getChannels()[i].getName())
+            return server.getChannels()[i];
+    }
+    throw std::runtime_error("Channel not found");
+}
+
 bool prohibidedCharacterJoin(std::string tmp)
 {
+    if (tmp[0] != '#')
+        return true;
     for (std::string::iterator i = tmp.begin(); i != tmp.end(); i++)
     {
         if (*i == ' ' || *i == ',' || *i == '*')
@@ -11,36 +33,104 @@ bool prohibidedCharacterJoin(std::string tmp)
     return false;
 }
 
-bool extractJoin(Client &client, Server &server, std::string tmp)
+std::vector<std::string> splitCommand(std::string command, char c)
+{
+    std::vector<std::string> word;
+    std::string w;
+    int first = 0;
+    
+    for (std::string::iterator i = command.begin(); i != command.end(); i++)
+    {
+        if (*i == c)
+        {
+            std::string::iterator other = i;
+            if (first == 0)
+            {
+                std::string tmp(command.begin(), i);
+                first = 1;
+                word.push_back(tmp);
+            }
+            else
+            {
+                std::string tmp(other + 1, i);
+                word.push_back(tmp);
+            }
+        }
+    }
+    return word;
+}
+
+bool extractAndSetJoin(Client &client, Server &server, std::string tmp)
 {
     std::stringstream ss(tmp);
     std::vector<std::string> word;
     std::string w;
+    int nbPassword = 0;
     
     while (ss >> w)
         word.push_back(w);
-    if (word.size() == 2)
+    int v = word[1].find_first_of(',', 0);
+    if (v)
     {
-        if (word[1] == "0")
+        std::vector<std::string> channelCommand = splitCommand(word[1], ',');
+        std::vector<std::string> passwordCommand = splitCommand(word[2], ',');
+        if (passwordCommand.size() > channelCommand.size())
         {
-            //quitter tout les channel pour ce client
+            server.sendMessage("461 " + client.getNickname() + " JOIN :Not enough parameters\r\n", client);
+            return false;
         }
-        if ((word[1][0] == '#' ||  word[1][0] == '&') && word[1].size() > 1)
+        else if (channelCommand.size() > passwordCommand.size())
+            nbPassword = passwordCommand.size();
+        for (int i = 0; i < channelCommand.size(); i++)
         {
-            word[1].erase(0, 5);
-            if (!prohibidedCharacterJoin(word[1]))
+            if(prohibidedCharacterJoin(word[i]))
+                server.sendMessage("476 " + client.getNickname() + " " + word[i] + " :Bad Channel Mask\r\n", client);
+            else
             {
-                client
+                if (server.getChannels().empty() || !searchChannelMatch(server, word[i]))
+                {
+                    Server::Channel channel;
+                    channel.getMembers().push_back(client);
+                    channel.setFirst(client);
+                    channel.setName(word[i]);
+                    client.getChannels().push_back(channel);
+                    server.getChannels().push_back(channel);
+                }
+                else
+                {
+                    try{
+                        Server::Channel &channel = ChannelMatch(server, word[i]);
+                        channel.getMembers().push_back(client);
+                        client.getChannels().push_back(channel);
+                    }
+                    catch(std::exception &e) {}
+                }
+            }
+        }
+        for (int i = 0; i < passwordCommand.size(); i++)
+        {
+            if (nbPassword != 0)
+            {
+                if(i == nbPassword)
+                    return;
+                try{
+                    ChannelMatch(server, channelCommand[i]).setPasssword(word[i]);
+                }
+                catch(std::exception &e) {}
             }
             else
-            {}
-        } 
+            {
+                for(int i = 0; i != channelCommand.size(); i++)
+                {   
+                    try{
+                        ChannelMatch(server, channelCommand[i]).setPasssword(word[i]);
+                    }
+                    catch(std::exception &e) {}
+                }
+            }
+        }
     }
-    else if (word.size() == 3)
-    {
-
-    }
-    if (word.size() > 3)
+    else
     {
 
     }
@@ -53,19 +143,8 @@ void JOIN(Client &client, Server &server, const char *tmp)
 
     if (buffer.size() < 2)
     {
-        server.sendMessage("", client);
+        server.sendMessage("", client); //message a set
         return ;
     }
-    if (server.getChannels().empty())
-    {
-        Server::Channel channel;
-        server.getChannels().push_back(channel);
-        server.getChannels().back().getMembers().push_back(client);
-        server.getChannels().back().setFirst(client);
-
-    }
-    else
-    {
-
-    }
+    extractAndSetJoin(client, server, buffer);
 }
