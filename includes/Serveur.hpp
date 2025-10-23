@@ -11,8 +11,8 @@ class Server
         int createServer();
         struct sockaddr_in &getSockaddr();
         std::vector<pollfd> &getFds();
-        std::vector<Client> &getClients();
-        std::vector<Channel> &getChannels();
+        std::vector<Client*> &getClients();
+        std::vector<Channel*> &getChannels();
         void closeAllSockets();
         void registerClient();
         bool checkDoubleName(const char *name);
@@ -22,8 +22,8 @@ class Server
         struct sockaddr_in serv_addr;
         int srv = -1;
         static bool Signal;
-        std::vector<Client> clients;
-        std::vector<Channel> channels;
+        std::vector<Client*> clients;
+        std::vector<Channel*> channels;
         std::vector<pollfd> fds;
         char *buffer;
 };
@@ -33,15 +33,16 @@ class Server::Channel
     private:
     
         Client First;
-        std::vector<Client> members;
+        std::vector<Client*> members;
         std::string topic;
         std::string name;
         std::string Password;
-        bool activePassword = false;
-        bool k = false;
-        bool l = false;
-        bool t = false;
-        bool i = false;
+        bool activePassword = false;        
+        bool k = false; // mdp pour le channel
+        bool l = false; // limit le nb de client
+        bool t = false; // seul un utilisateur peut changer le topic du channel
+        bool i = false; // Définir/supprimer le canal sur invitation uniquement
+        bool o = false; // Donner/retirer le privilège de l’opérateur de canal
         int membersLimit = 0;
 
     public:
@@ -52,10 +53,12 @@ class Server::Channel
         bool &getI();
         bool &getT();
         bool &getL();
+        bool &getPasswordMode();
+        int  getMembersLimit();
         std::string &getTopic();
         std::string &getName();
-        std::map<std::string, bool> &getPass();
-        std::vector<Client> &getMembers();
+        std::string &getPass();
+        std::vector<Client*> &getMembers();
     
     //      SET         //
 
@@ -75,5 +78,6 @@ bool extractAndSetMessageForUser(char *tmp, Client &client, Server &server);
 void setUserAndNick(Client &client, Server &server);
 std::string joinVector(const std::vector<std::string> &vec, char sep);
 bool prohibidedCharacter(std::string tmp);
-bool prohibidedCharacterJoin(std::string tmp);
-
+bool prohibidedCharacterJoin(std::string tmp, bool checkFirst);
+void JOIN(Client &client, Server &server, const char *tmp);
+Server::Channel &ChannelMatch(Server server, std::string name);

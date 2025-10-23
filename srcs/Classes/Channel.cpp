@@ -61,6 +61,11 @@ bool &Server::Channel::getL()
     return l;
 }
 
+int Server::Channel::getMembersLimit()
+{
+    return membersLimit;
+}
+
 std::string &Server::Channel::getName()
 {
     return this->name;
@@ -71,7 +76,12 @@ std::string &Server::Channel::getTopic()
     return this->topic;
 }
 
-std::vector<Client> &Server::Channel::getMembers()
+std::vector<Client*> &Server::Channel::getMembers()
 {
     return this->members;
+}
+
+std::string &Server::Channel::getPass()
+{
+    return this->Password;
 }

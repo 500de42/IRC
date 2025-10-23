@@ -25,7 +25,7 @@ class Client
         std::string realname;
         char *Buffer;
         bool isRegistred = false;
-        std::vector<Server::Channel> channels;
+        std::vector<Server::Channel*> channels;
 
     public:
         //      GET     //
@@ -40,7 +40,7 @@ class Client
         std::string &getNickname();
         std::string &getUsername();
         std::string &getRealname();
-        std::vector<Server::Channel> &getChannels();
+        std::vector<Server::Channel*> &getChannels();
 
         //      SET     //
 

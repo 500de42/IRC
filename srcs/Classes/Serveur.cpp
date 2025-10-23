@@ -34,7 +34,7 @@ int Server::createServer()
 }
 
 
-std::vector<Client> &Server::getClients()
+std::vector<Client*> &Server::getClients()
 {
     return clients;
 }
@@ -48,8 +48,8 @@ void Server::closeAllSockets()
 {
     for (int i = 0; i <= 11; i++)
     {
-        if(this->getClients()[i].getFd() > 0)
-            close(this->getClients()[i].getFd());
+        if(this->getClients()[i]->getFd() > 0)
+            close(this->getClients()[i]->getFd());
     }
     if (this->srv)
         close(this->srv);
@@ -61,7 +61,7 @@ bool Server::checkDoubleName(const char *name)
         return false;
     for(int i = 0; i < this->getClients().size(); i++)
     {
-        if (name == this->getClients()[i].getUsername())
+        if (name == this->getClients()[i]->getUsername())
             return false;
     }
     return true;

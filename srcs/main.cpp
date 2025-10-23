@@ -21,21 +21,21 @@ int main()
                     struct pollfd server_poll;
                     server_poll.fd = client.getSocket();
                     server_poll.events = POLLIN;
-                    server.getClients().push_back(client);
+                    server.getClients().push_back(&client);
                     server.getFds().push_back(server_poll);
                     std::cout << "[Server] New client connected (fd = " << server_poll.fd << ")\n";
                 }
             }
         for (int i = 1; i < server.getFds().size() ; i++)
         {
-            size_t len = sizeof(server.getClients()[i].getBuffer());
+            size_t len = sizeof(server.getClients()[i]->getBuffer());
             if (server.getFds()[i].revents & POLLIN)
             {
-                ssize_t bytes = recv(server.getFds()[i].fd, server.getClients()[i].getBuffer(), len, 0);
+                ssize_t bytes = recv(server.getFds()[i].fd, server.getClients()[i]->getBuffer(), len, 0);
                 if (bytes > 0)
                 {
-                    char *buff = server.getClients()[i].getBuffer();
-                    Client &tmp = server.getClients()[i];
+                    char *buff = server.getClients()[i]->getBuffer();
+                    Client &tmp = *server.getClients()[i];
                     if (!tmp.getRegister())
                     {
                         setUserAndNick(tmp, server);
@@ -43,9 +43,7 @@ int main()
                     else
                     {//METTRE EN PLACE POINTEUR SUR METHODES
                         if (!strncmp(buff, "JOIN ", 5))
-                        {
-                            
-                        }
+                            JOIN(tmp, server, buff);
                         else if (!strncmp(buff, "KICK ", 5))
                         {
 

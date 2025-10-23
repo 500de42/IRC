@@ -81,6 +81,11 @@ std::string &Client::getUsername()
     return this->username;
 }
 
+std::vector<Server::Channel*> &Client::getChannels()
+{
+    return this->channels;
+}
+
 void Client::onRegisted()
 {
     this->isRegistred = true;
