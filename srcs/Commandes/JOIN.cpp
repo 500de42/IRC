@@ -57,7 +57,7 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
             {
                 Server::Channel channel;
                 channel.getMembers().push_back(&client);
-                channel.setFirst(client);
+                channel.setOperator(client);
                 channel.setName(word[i]);
                 if(word.size() == 2)
                     channel.setPasssword(passwordCommand[i]);

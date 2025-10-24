@@ -11,9 +11,21 @@ void Server::Channel::setName(const std::string &name)
     this->name = name;
 }
 
-void Server::Channel::setFirst(Client &client)
+void Server::Channel::setOperator(Client &client)
 {
-    this->First = client;
+    this->operators.push_back(&client);
+}
+
+void Server::Channel::setOffOperator(Client &client)
+{
+    for(int i = 0; i < this->operators.size(); i++)
+    {
+        if (client.getNickname() == this->operators[i]->getNickname())
+        {
+            operators.erase(operators.begin() + i);
+            client.setOp("", false); // ajouter une option pour enlever exactement l index de l op dans la map
+        }
+    }
 }
 
 void Server::Channel::setPasssword(const std::string &name)
@@ -21,24 +33,29 @@ void Server::Channel::setPasssword(const std::string &name)
     this->Password = name;
 }
 
-void Server::Channel::setK(bool &active)
+void Server::Channel::setK(bool active)
 {
     k = active;
 }
 
-void Server::Channel::setL(bool &active)
+void Server::Channel::setL(bool active)
 {
     l = active;
 }
 
-void Server::Channel::setI(bool &active)
+void Server::Channel::setI(bool active)
 {
     i = active;
 }
 
-void Server::Channel::setT(bool &active)
+void Server::Channel::setT(bool active)
 {
     t = active;
+}
+
+void Server::Channel::setMembersLimit(size_t limit)
+{
+    this->membersLimit = limit;
 }
 
 bool &Server::Channel::getI()
@@ -61,7 +78,7 @@ bool &Server::Channel::getL()
     return l;
 }
 
-int Server::Channel::getMembersLimit()
+size_t Server::Channel::getMembersLimit()
 {
     return membersLimit;
 }

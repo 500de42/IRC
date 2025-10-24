@@ -20,6 +20,7 @@ class Client
         std::string ipAddress;
         int cliSocket = -1;
         int servSocket = -1;
+        std::map<std::string, bool> channelOp;
         std::string nickname;
         std::string username;
         std::string realname;
@@ -32,6 +33,7 @@ class Client
 
         std::string getIpAddr();
         int getFd();
+        bool getOp(std::string name);
         int getServsocket();
         int getSocket();
         char * getBuffer();
@@ -51,6 +53,7 @@ class Client
         void setUsername(const char *name);
         void setRealname(const char *name);
         void onRegisted();
+        void setOp(std::string name, bool mode);
         Client();
         //              //
 

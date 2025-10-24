@@ -44,6 +44,19 @@ void Client::setBuffer(char *buffer)
     Buffer = buffer;
 }
 
+void Client::setOp(std::string name, bool mode)
+{
+    this->channelOp[name] = mode;
+}
+bool Client::getOp(std::string name)
+{
+    for(std::map<std::string, bool>::iterator i = channelOp.begin(); i != channelOp.end(); i++)
+    {
+        if (i->first == name)
+            return i->second;
+    }
+    return false;
+}
 
 int Client::getSocket()
 {
