@@ -1,11 +1,19 @@
 #include "../includes/Serveur.hpp"
 #include "../includes/Client.hpp"
+#include "Commandes/JOIN.cpp"
+#include "Commandes/MODE.cpp"
+#include "Commandes/utils.cpp"
+#include "Classes/Channel.cpp"
+#include "Classes/Client.cpp"
+#include "Classes/Serveur.cpp"
+
+
 
 int main()
 {
     Server server;
     std::string line;
-    int checkPoll = -1;
+    // int checkPoll = -1;
 
     if (server.createServer())
         return 1;
@@ -26,7 +34,7 @@ int main()
                     std::cout << "[Server] New client connected (fd = " << server_poll.fd << ")\n";
                 }
             }
-        for (int i = 1; i < server.getFds().size() ; i++)
+        for (size_t i = 1; i < server.getFds().size() ; i++)
         {
             size_t len = sizeof(server.getClients()[i]->getBuffer());
             if (server.getFds()[i].revents & POLLIN)

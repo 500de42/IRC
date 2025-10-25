@@ -1,17 +1,5 @@
-#include "../includes/Serveur.hpp"
-#include "../includes/Client.hpp"
-
-void JOIN(Client &client, Server &server, const char *tmp)
-{
-    std::string buffer(tmp);
-
-    if (buffer.size() < 2)
-    {
-        server.sendMessage("461 " + client.getNickname() + " JOIN :Not enough parameters\r\n", client);
-        return ;
-    }
-    extractAndSetJoin(client, server, buffer);// envoyer a l espace apres join //
-}
+#include "../../includes/Serveur.hpp"
+#include "../../includes/Client.hpp"
 
 // 473 <nick> #private :Cannot join channel (+i)\r\n channel prive //
 
@@ -47,7 +35,7 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
         else if (channelCommand.size() > passwordCommand.size())
             nbPassword = passwordCommand.size();
     }
-    for (int i = 0; i < channelCommand.size(); i++)
+    for (size_t i = 0; i < channelCommand.size(); i++)
     {
         if(prohibidedCharacterJoin(channelCommand[i], true))
             server.sendMessage("476 " + client.getNickname() + " " + word[i] + " :Bad Channel Mask\r\n", client);
@@ -100,63 +88,14 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
     }
 }
 
-bool searchChannelMatch(Server server, std::string name)
+void JOIN(Client &client, Server &server, const char *tmp)
 {
-    for(int i = 0; i < server.getChannels().size(); i++)
-    {
-        if (name == server.getChannels()[i]->getName())
-            return true;
-    }
-    return false;
-}
+    std::string buffer(tmp);
 
-Server::Channel &ChannelMatch(Server server, std::string name)
-{
-    for(int i = 0; i < server.getChannels().size(); i++)
+    if (buffer.size() < 2)
     {
-        if (name == server.getChannels()[i]->getName())
-            return *server.getChannels()[i];
+        server.sendMessage("461 " + client.getNickname() + " JOIN :Not enough parameters\r\n", client);
+        return ;
     }
-    throw std::runtime_error("Channel not found");
-}
-
-bool prohibidedCharacterJoin(std::string tmp, bool checkFirst)
-{
-    if (checkFirst && tmp[0] != '#')
-        return true;
-    for (std::string::iterator i = tmp.begin(); i != tmp.end(); i++)
-    {
-        if (*i == ' ' || *i == ',' || *i == '*')
-            return true;
-    }
-    return false;
-}
-
-std::vector<std::string> splitCommand(std::string command, char c)
-{
-    std::vector<std::string> word;
-    std::string w;
-    int first = 0;
-    
-    for (std::string::iterator i = command.begin(); i != command.end(); i++)
-    {
-        if (*i == c)
-        {
-            std::string::iterator other = i;
-            if (first == 0)
-            {
-                std::string tmp(command.begin(), i);
-                first = 1;
-                word.push_back(tmp);
-            }
-            else
-            {
-                std::string tmp(other + 1, i);
-                word.push_back(tmp);
-            }
-        }
-    }
-    if (!first)
-        word.push_back(command);
-    return word;
+    extractAndSetJoin(client, server, buffer);// envoyer a l espace apres join //
 }

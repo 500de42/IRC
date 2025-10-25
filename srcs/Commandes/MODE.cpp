@@ -1,6 +1,14 @@
-#include "../includes/Serveur.hpp"
-#include "../includes/Client.hpp"
-#include "../includes/Channel.hpp"
+#include "../../includes/Serveur.hpp"
+#include "../../includes/Client.hpp"
+#include "../../includes/Channel.hpp"
+
+void extractAndSetMode(Client &client, Server &server, std::string tmp);
+void setModeOnChannel(std::vector<std::string> word, Client &client, Server &server, Server::Channel &channel);
+bool matchChannelMember(std::string name, Server::Channel channel);
+bool checkNum(std::string tmp);
+bool prohibidedCharacterModePassword(std::string word);
+bool prohibidedCharacterMode(std::string tmp, bool checkFirst);
+bool checkOptions(char c);
 
 void MODE(Server &server, Client &client, const char *tmp)
 {
@@ -19,7 +27,6 @@ void extractAndSetMode(Client &client, Server &server, std::string tmp)
     std::stringstream ss(tmp);
     std::vector<std::string> word;
     std::string w;
-    int nbPassword = -1;
     
     while (ss >> w)
         word.push_back(w);
@@ -82,7 +89,7 @@ void setModeOnChannel(std::vector<std::string> word, Client &client, Server &ser
     for(std::map<char, bool>::iterator i = option.begin(); i != option.end(); i++)
     {
         executedParameters++;
-        if (i->first == 'k' || i->first == 'o' || i->first == 'l' && nbParameters <= executedParameters)
+        if ((i->first == 'k' || i->first == 'o' || i->first == 'l' ) && (nbParameters <= executedParameters))
         {
             server.sendMessage("403 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
         }
@@ -144,7 +151,7 @@ void setModeOnChannel(std::vector<std::string> word, Client &client, Server &ser
                 if (i->second == true)
                 {
                     channel.setI(true);
-                    channel.setMembersLimit(std::atoi(word[index].c_str()));
+                    channel.setMembersLimit(atoi(word[index].c_str()));
                 }
                 else
                 {
@@ -162,7 +169,7 @@ void setModeOnChannel(std::vector<std::string> word, Client &client, Server &ser
 
 bool matchChannelMember(std::string name, Server::Channel channel)
 {
-    for (int i = 0; i < channel.getMembers().size(); i++)
+    for (size_t i = 0; i < channel.getMembers().size(); i++)
     {
         if (name == channel.getMembers()[i]->getNickname())
             return false;
@@ -177,7 +184,7 @@ bool checkNum(std::string tmp)
         if (isdigit(*i))
             return false;
     }
-    if (std::atol(tmp.c_str()) < 0)
+    if (atol(tmp.c_str()) < 0)
         return false;
     return true;
 }

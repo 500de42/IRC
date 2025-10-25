@@ -1,5 +1,5 @@
-#include "../includes/Serveur.hpp"
-#include "../includes/Client.hpp"
+#include "../../includes/Serveur.hpp"
+#include "../../includes/Client.hpp"
 
 std::string joinVector(const std::vector<std::string> &vec, char sep)
 {
@@ -58,8 +58,8 @@ bool prohibidedCharacter(std::string tmp)
 {
     for (std::string::iterator i = tmp.begin(); i != tmp.end(); i++)
     {
-        if (*i == ' ' || *i == ',' || *i == '*' || *i == '?' 
-            || *i == '!' || *i == '@' || *i >= 0 && *i <= 31)
+        if ((*i == ' ' || *i == ',' || *i == '*' || *i == '?' 
+            || *i == '!' || *i == '@' || *i >= 0) && *i <= 31)
         {
             std::cout << ":server_name 461 * USER :Not enough parameters\n";
             return true;
@@ -68,11 +68,11 @@ bool prohibidedCharacter(std::string tmp)
     return false;
 }
 
-template <typename T>
-void sendMessage(T c, std::string buffer)
-{
-    T.send
-}
+// template <typename T>
+// void sendMessage(T c, std::string buffer)
+// {
+//     T.send
+// }
 
 std::string extractMessage(char *tmp)
 {
@@ -85,10 +85,10 @@ std::string extractMessage(char *tmp)
     return line;
 }
 
-bool parsingSetUser(std::vector<std::string> &tab)
-{
+// bool parsingSetUser(std::vector<std::string> &tab)
+// {
     
-}
+// }
 
 void setUserAndNick(Client &client, Server &server)
 {
@@ -103,11 +103,13 @@ void setUserAndNick(Client &client, Server &server)
     if (!strncmp(buff, "USER", 4))
     {
         if (client.getUsername().empty())          
+        {
             if (!extractAndSetMessageForUser(buff, client, server))
             {    
                 // ERR_ALREADYREGISTRED();
                 server.sendMessage("\r\n", client);//erreur a ecrire et envoyer au client
             }
+        }
         else
             server.sendMessage("\r\n", client);//erreur a ecrire et envoyer au client
     }
@@ -137,5 +139,66 @@ void setUserAndNick(Client &client, Server &server)
     }
     else
         server.sendMessage("\r\n", client);
+}
+
+bool searchChannelMatch(Server server, std::string name)
+{
+    for(size_t i = 0; i < server.getChannels().size(); i++)
+    {
+        if (name == server.getChannels()[i]->getName())
+            return true;
+    }
+    return false;
+}
+
+Server::Channel &ChannelMatch(Server server, std::string name)
+{
+    for(size_t i = 0; i < server.getChannels().size(); i++)
+    {
+        if (name == server.getChannels()[i]->getName())
+            return *server.getChannels()[i];
+    }
+    throw std::runtime_error("Channel not found");
+}
+
+bool prohibidedCharacterJoin(std::string tmp, bool checkFirst)
+{
+    if (checkFirst && tmp[0] != '#')
+        return true;
+    for (std::string::iterator i = tmp.begin(); i != tmp.end(); i++)
+    {
+        if (*i == ' ' || *i == ',' || *i == '*')
+            return true;
+    }
+    return false;
+}
+
+std::vector<std::string> splitCommand(std::string command, char c)
+{
+    std::vector<std::string> word;
+    std::string w;
+    int first = 0;
+    
+    for (std::string::iterator i = command.begin(); i != command.end(); i++)
+    {
+        if (*i == c)
+        {
+            std::string::iterator other = i;
+            if (first == 0)
+            {
+                std::string tmp(command.begin(), i);
+                first = 1;
+                word.push_back(tmp);
+            }
+            else
+            {
+                std::string tmp(other + 1, i);
+                word.push_back(tmp);
+            }
+        }
+    }
+    if (!first)
+        word.push_back(command);
+    return word;
 }
 

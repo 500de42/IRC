@@ -1,5 +1,6 @@
-#include <iostream>
 #pragma once
+#include "Serveur.hpp"
+#include <iostream>
 #include <vector>
 #include <cstring>
 #include <unistd.h>
@@ -8,24 +9,24 @@
 #include <string>
 #include <sstream>
 #include <poll.h>
-#include <cstdbool>
+#include <stdbool.h>
 #include <cerrno>
-#include <Channel.hpp>
-
+#include <cstdlib>
+#include <map>
 
 class Client
 {
     private:
         struct sockaddr_in cli_addr;
         std::string ipAddress;
-        int cliSocket = -1;
-        int servSocket = -1;
+        int cliSocket;
+        int servSocket;
         std::map<std::string, bool> channelOp;
         std::string nickname;
         std::string username;
         std::string realname;
         char *Buffer;
-        bool isRegistred = false;
+        bool isRegistred;
         std::vector<Server::Channel*> channels;
 
     public:

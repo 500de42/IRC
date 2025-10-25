@@ -1,5 +1,15 @@
-#include "../includes/Serveur.hpp"
-#include "../includes/Client.hpp"
+#include "../../includes/Serveur.hpp"
+#include "../../includes/Client.hpp"
+
+Server::Channel::Channel()
+{
+    membersLimit = 0;
+    k = false; 
+	l = false; 
+	t = false; 
+	i = false; 
+	o = false;
+}
 
 void Server::Channel::setTopic(const std::string &name)
 {
@@ -18,7 +28,7 @@ void Server::Channel::setOperator(Client &client)
 
 void Server::Channel::setOffOperator(Client &client)
 {
-    for(int i = 0; i < this->operators.size(); i++)
+    for(size_t i = 0; i < this->operators.size(); i++)
     {
         if (client.getNickname() == this->operators[i]->getNickname())
         {

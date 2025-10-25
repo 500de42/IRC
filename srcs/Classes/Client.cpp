@@ -1,5 +1,5 @@
-#include "../includes/Serveur.hpp"
-#include "../includes/Client.hpp"
+#include "../../includes/Serveur.hpp"
+#include "../../includes/Client.hpp"
 
 Client::Client()
 {
@@ -7,6 +7,9 @@ Client::Client()
     this->cli_addr.sin_port = htons(6667);
     this->cli_addr.sin_family = AF_INET;
     this->cli_addr.sin_addr.s_addr = inet_addr("127.0.1.0");
+    cliSocket = -1;
+    servSocket = -1;
+    isRegistred = false;
 }
 
 int Client::getServsocket()

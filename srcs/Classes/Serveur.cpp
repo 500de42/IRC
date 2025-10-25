@@ -1,5 +1,10 @@
-#include "../includes/Serveur.hpp"
-#include "../includes/Client.hpp"
+#include "../../includes/Serveur.hpp"
+#include "../../includes/Client.hpp"
+
+Server::Server()
+{
+    srv = -1;
+}
 
 int Server::createServer()
 {
@@ -59,7 +64,7 @@ bool Server::checkDoubleName(const char *name)
 {
     if (!name)
         return false;
-    for(int i = 0; i < this->getClients().size(); i++)
+    for(size_t i = 0; i < this->getClients().size(); i++)
     {
         if (name == this->getClients()[i]->getUsername())
             return false;
