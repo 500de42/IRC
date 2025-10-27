@@ -54,9 +54,10 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
             }
             else
             {
-                try{
+                try
+                {
                     Server::Channel &channel = ChannelMatch(server, word[i]);
-                    if (channel.getPasswordMode())
+                    if (channel.getK())
                     {
                         if (word.size() == 2 && channel.getPass() == passwordCommand[i])
                         {

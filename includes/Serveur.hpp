@@ -1,5 +1,19 @@
 #pragma once
-#include "Client.hpp"
+#include <iostream>
+#include <vector>
+#include <cstring>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <string>
+#include <sstream>
+#include <poll.h>
+#include <stdbool.h>
+#include <cerrno>
+#include <cstdlib>
+#include <map>
+
+class Client;
 
 class Server
 {
@@ -26,7 +40,6 @@ class Server
 			bool &getI();
 			bool &getT();
 			bool &getL();
-			bool &getPasswordMode();
 			size_t getMembersLimit();
 			std::string &getTopic();
 			std::string &getName();
@@ -34,7 +47,6 @@ class Server
 			std::vector<Client *> &getMembers();
 
 			//      SET         //
-
 			void setK(bool active);
 			void setT(bool active);
 			void setI(bool active);
@@ -50,17 +62,26 @@ class Server
 
 	public:
 
-		Server();
+		Server(char**av);
 		int createServer();
+		void closeAllSockets();
+		// void registerClient();
+		bool checkDoubleName(const char *name);
+		void sendMessage(std::string buffer, Client client);
+
+		//		GET			//
+
 		struct sockaddr_in &getSockaddr();
 		std::vector<pollfd> &getFds();
 		std::vector<Client *> &getClients();
 		std::vector<Channel *> &getChannels();
-		void closeAllSockets();
-		void registerClient();
-		bool checkDoubleName(const char *name);
-		void sendMessage(std::string buffer, Client client);
+		std::string &getPass();
+		int &getPort();
 
+		//		SET			//
+
+		void setPassword(std::string &name);
+		void setPort(int Port);
 
 	private:
 		struct sockaddr_in serv_addr;
@@ -69,10 +90,13 @@ class Server
 		std::vector<Client *> clients;
 		std::vector<Channel *> channels;
 		std::vector<pollfd> fds;
+		int port;
+		std::string pass;
 		char *buffer;	
 };
 
 std::string extractMessage(char *tmp);
+std::string extractPass(std::string pass);
 bool	extractAndSetMessageForUser(char *tmp, Client &client, Server &server);
 void	setUserAndNick(Client &client, Server &server);
 std::string joinVector(const std::vector<std::string> &vec, char sep);
@@ -82,4 +106,6 @@ void	JOIN(Client &client, Server &server, const char *tmp);
 Server::Channel &ChannelMatch(Server server, std::string name);
 std::vector<std::string> splitCommand(std::string command, char c);
 bool searchChannelMatch(Server server, std::string name);
-
+bool prohibidedCharacterModePassword(std::string word);
+bool prohibitedCharacterServerPassword(std::string word);
+bool checkNum(std::string tmp);

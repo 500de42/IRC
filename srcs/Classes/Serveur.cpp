@@ -1,9 +1,11 @@
 #include "../../includes/Serveur.hpp"
 #include "../../includes/Client.hpp"
 
-Server::Server()
+Server::Server(char **av)
 {
     srv = -1;
+    this->setPassword((std::string &)av[2]);
+	this->setPort(std::atoi(av[1]));
 }
 
 int Server::createServer()
@@ -13,7 +15,7 @@ int Server::createServer()
         return 1;
     int opt = 1;
     std::memset(&serv_addr, 0, sizeof(serv_addr));
-    this->serv_addr.sin_port = htons(6667);
+    this->serv_addr.sin_port = htons(port);
     this->serv_addr.sin_family = AF_INET;
     this->serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     setsockopt(srv, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
@@ -53,8 +55,8 @@ void Server::closeAllSockets()
 {
     for (int i = 0; i <= 11; i++)
     {
-        if(this->getClients()[i]->getFd() > 0)
-            close(this->getClients()[i]->getFd());
+        if(this->getClients()[i]->getSocket() > 0)
+            close(this->getClients()[i]->getSocket());
     }
     if (this->srv)
         close(this->srv);
@@ -79,4 +81,34 @@ void Server::sendMessage(std::string buffer, Client client)
     {
         std::cout << "Error sending message:" << strerror(errno) << "\n";
     }
+}
+
+std::vector<Server::Channel *> &Server::getChannels()
+{
+    return channels;
+}
+
+std::vector<pollfd> &Server::getFds()
+{
+    return fds;
+}
+
+void Server::setPassword(std::string &name)
+{
+    pass = name;
+}
+
+void Server::setPort(int Port)
+{
+    port = Port;
+}
+
+int &Server::getPort()
+{
+    return port;
+}
+
+std::string &Server::getPass()
+{
+    return pass;
 }

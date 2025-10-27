@@ -181,7 +181,7 @@ bool checkNum(std::string tmp)
 {
     for(std::string::iterator i = tmp.begin(); i != tmp.end(); i++)
     {
-        if (isdigit(*i))
+        if (!isdigit(*i))
             return false;
     }
     if (atol(tmp.c_str()) < 0)

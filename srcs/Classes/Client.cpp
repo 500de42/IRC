@@ -1,15 +1,19 @@
 #include "../../includes/Serveur.hpp"
 #include "../../includes/Client.hpp"
 
-Client::Client()
-{
+Client::Client(int port)
+{	std::cout << "\n\ntestclient\n\n";
+
     std::memset(&cli_addr, 0, sizeof(cli_addr));
-    this->cli_addr.sin_port = htons(6667);
+    this->cli_addr.sin_port = htons(port);
     this->cli_addr.sin_family = AF_INET;
     this->cli_addr.sin_addr.s_addr = inet_addr("127.0.1.0");
     cliSocket = -1;
     servSocket = -1;
     isRegistred = false;
+    goodPass = false;
+    std::cout << "\n\ntestclient2\n\n";
+
 }
 
 int Client::getServsocket()
@@ -24,7 +28,7 @@ void Client::setServsocket(int nb)
 
 void Client::setCliSocket(int nb)
 {
-    this->servSocket = nb;
+    this->cliSocket = nb;
 }
 
 void Client::setRealname(const char *name)
@@ -61,6 +65,11 @@ bool Client::getOp(std::string name)
     return false;
 }
 
+bool Client::getGivenPassword()
+{
+    return goodPass;
+}
+
 int Client::getSocket()
 {
     return this->cliSocket;
@@ -74,6 +83,11 @@ struct sockaddr_in &Client::getSockaddr()
 char *Client::getBuffer()
 {
     return Buffer;
+}
+
+bool Client::getRegister()
+{
+    return isRegistred;
 }
 
 Client &Client::operator=(const Client &cpy)
@@ -97,6 +111,11 @@ std::string &Client::getUsername()
     return this->username;
 }
 
+std::string &Client::getRealname()
+{
+    return realname;
+}
+
 std::vector<Server::Channel*> &Client::getChannels()
 {
     return this->channels;
@@ -105,4 +124,9 @@ std::vector<Server::Channel*> &Client::getChannels()
 void Client::onRegisted()
 {
     this->isRegistred = true;
+}
+
+void Client::onPass()
+{
+    this->goodPass = true;
 }

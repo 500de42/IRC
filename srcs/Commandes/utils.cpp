@@ -202,3 +202,27 @@ std::vector<std::string> splitCommand(std::string command, char c)
     return word;
 }
 
+std::string extractPass(std::string pass)
+{
+    if (pass.empty())
+        return "";
+    std::vector<std::string> vec;
+    std::stringstream ss(pass);
+    std::string line;
+    while (ss >> line)
+        vec.push_back(line);
+    if (vec.size() != 2)
+        return "";
+    return vec[1];
+}
+
+bool prohibitedCharacterServerPassword(std::string word)
+{
+    for (std::string::iterator i = word.begin(); i != word.end(); i++)
+    {
+        if (*i == ',' || *i == '\n' || *i == '\r')
+            return true;
+    }
+    return false;
+}
+
