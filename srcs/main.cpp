@@ -29,8 +29,9 @@ int	main(int ac, char **av)
 		return (1);
 	while (1)
 	{
+		std::cout << "test reset\n";
 		if (poll(&server.getFds()[0], server.getFds().size(), -1) > 0)
-			if (server.getFds()[0].revents & POLLIN)
+		{	if (server.getFds()[0].revents & POLLIN)
 			{std::cout << "\n\ntest1\n\n";
 				Client*client = new Client(server.getPort());
                 std::cout << "\n\ntest2\n\n";
@@ -48,21 +49,22 @@ int	main(int ac, char **av)
                 {
                     std::cout << "error addind client in vector\n\n";
                 }
-			}
+			}}
             std::cout << "\n\ntest4\n\n";
-		for (size_t i = 1; i < server.getFds().size(); i++)
+		for (size_t i = 1; i < server.getFds().size() - 1; i++)
 		{std::cout << "\n\ntest5\n\n";
-			len = sizeof(server.getClients()[i]->getBuffer());
-            std::cout << "\n\ntest6\n\n";
+			len = sizeof(server.getClients()[i - 1]->getBuffer());
+            std::cout << "\n " << i << " client size : " << server.getClients().size() << "\ntest6\n\n";
 			if (server.getFds()[i].revents & POLLIN)
 			{
-                std::cout << "\n\ntest7 fd" << server.getClients()[i]->getSocket() << "\n\n" ;
-				bytes = recv(server.getFds()[i].fd, server.getClients()[i]->getBuffer(), len, 0);
+                std::cout << "\n\ntest7 fd" ;
+				std::cout << server.getClients()[i - 1]->getSocket() << "\n\n" ;
+				bytes = recv(server.getFds()[i].fd, server.getClients()[i - 1]->getBuffer(), len, 0);
                 std::cout << "\n\ntest7.5\n\n";
 				if (bytes > 0)
 				{std::cout << "\n\ntest8\n\n";
-					buff = server.getClients()[i]->getBuffer();
-					Client &tmp = *server.getClients()[i];
+					buff = server.getClients()[i - 1]->getBuffer();
+					Client &tmp = *server.getClients()[i - 1];
                     std::cout << "\n\ntest9\n\n";
                     if (!tmp.getGivenPassword())
                     {
@@ -115,18 +117,25 @@ int	main(int ac, char **av)
 				}
 				else if (bytes == 0)
 				{
+					                    std::cout << "\n\ntest9\n\n";
 					// errno(); client deco
 				}
 				else
 				{
+					                    std::cout << "\n\ntest91\n\n";
+
 					// error
 				}
 			}
 			else if (server.getFds()[i].revents & POLLERR)
 			{
+				                    std::cout << "\n\ntest99\n\n";
+
 			}
 			else if (server.getFds()[i].revents & POLLHUP)
 			{
+				                    std::cout << "\n\ntest999\n\n";
+
 			}
 		}
 	}
