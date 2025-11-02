@@ -25,7 +25,7 @@ class Client
 	std::string nickname;
 	std::string username;
 	std::string realname;
-	char *Buffer;
+	char Buffer[512];
 	bool goodPass;
 	bool isRegistred;
 	std::vector<Server::Channel *> channels;

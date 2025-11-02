@@ -32,13 +32,15 @@ int	main(int ac, char **av)
 		std::cout << "test reset\n";
 		if (poll(&server.getFds()[0], server.getFds().size(), -1) > 0)
 		{	if (server.getFds()[0].revents & POLLIN)
-			{std::cout << "\n\ntest1\n\n";
+			{
+				std::cout << "\n\ntest1\n\n";
 				Client*client = new Client(server.getPort());
                 std::cout << "\n\ntest2\n\n";
 				client->setCliSocket(accept(server.getFds()[0].fd, NULL, NULL));
                 std::cout << "\n\ntest553\n\n";
 				if (client->getSocket() > 0)
-				{std::cout << "\n\ntest3\n\n";
+				{
+					std::cout << "\n\ntest3\n\n";
 					server_poll.fd = client->getSocket();
 					server_poll.events = POLLIN;
 					client->setServsocket(server.getFds()[0].fd);
@@ -50,92 +52,131 @@ int	main(int ac, char **av)
                     std::cout << "error addind client in vector\n\n";
                 }
 			}}
-            std::cout << "\n\ntest4\n\n";
-		for (size_t i = 1; i < server.getFds().size() - 1; i++)
-		{std::cout << "\n\ntest5\n\n";
-			len = sizeof(server.getClients()[i - 1]->getBuffer());
-            std::cout << "\n " << i << " client size : " << server.getClients().size() << "\ntest6\n\n";
-			if (server.getFds()[i].revents & POLLIN)
+            // std::cout << "\n\ntest4\n\n";
+		if (server.getClients().size())
+		{
+			for (size_t i = 1; i < server.getFds().size(); i++)
 			{
-                std::cout << "\n\ntest7 fd" ;
-				std::cout << server.getClients()[i - 1]->getSocket() << "\n\n" ;
-				bytes = recv(server.getFds()[i].fd, server.getClients()[i - 1]->getBuffer(), len, 0);
-                std::cout << "\n\ntest7.5\n\n";
-				if (bytes > 0)
-				{std::cout << "\n\ntest8\n\n";
-					buff = server.getClients()[i - 1]->getBuffer();
-					Client &tmp = *server.getClients()[i - 1];
-                    std::cout << "\n\ntest9\n\n";
-                    if (!tmp.getGivenPassword())
-                    {
-                        std::string str(buff);
-						if (!str.rfind("PASS", 0))
-						{std::cout << "\n\ntest\n\n";
-							if (extractPass(str) == server.getPass())
-								tmp.onPass();
-							else
+				//std::cout << "\n\ntest5\n\n";
+				Client &tmp = *server.getClients()[i - 1];
+				//std::cout << "\n " << i << " client size : " << server.getClients().size() << "\ntest6\n\n";
+				if (server.getFds()[i].revents & POLLIN)
+				{
+					std::cout << "\n\ntest7 fd\n" ;
+					std::cout << " " + tmp.getRegister() << std::endl;
+					std::cout << "size of vector client " << server.getClients().size() << std::endl; 
+					std::cout << server.getClients()[i - 1]->getSocket() << "\n\n";                
+					std::cout << "\n\ntest7.5\n\n";
+					buff = tmp.getBuffer();
+					memset(buff, 0, strlen(buff));
+					bytes = recv(server.getFds()[i].fd, buff, 512, 0);
+					std::cout << "\n\ntest7.7\n\n";
+					if (bytes > 0)
+					{				
+						std::cout << "\n\ntest8\n\n";
+						buff[bytes - 2] = '\0';
+						std::cout << "\n\ntest9\n\n";
+						if (!tmp.getGivenPassword())
+						{
+							std::cout << "\n\ntest 10 BUFFER: " << buff << "\n\n";
+							std::string str(buff);
+							if (!strncmp(buff, "PASS ", 5))
+							{
+								std::cout << "\n\ntest extract pass: " << extractPass(str) << " PASS DU SERVER : " << server.getPass() << "\n\n";
+								if (extractPass(str) == server.getPass())
+									tmp.onPass();
+								else
+								{
+									std::cout << "\n\ntest 11 \n\n";
+									server.sendMessage("464 * :Password incorrect\r\n", tmp);
+									close(tmp.getSocket());
+									server.getClients().erase(server.getClients().begin() + (i - 1));
+									server.getFds().erase(server.getFds().begin() + i);
+									delete &tmp;
+									i--;
+									continue;
+								}
+							}
+							else 
 							{
 								server.sendMessage("464 * :Password incorrect\r\n", tmp);
 								close(tmp.getSocket());
-								server.getClients().erase(server.getClients().begin()
-									+ i);
-								server.getFds().erase(server.getFds().begin()
-									+ i);
+								server.getClients().erase(server.getClients().begin() + i);
+								server.getFds().erase(server.getFds().begin() + (i - 1));
+								delete &tmp;
+								i--;
+								continue;
+								std::cout << "Rejet de connexion. FD: <client_fd>. Première commande invalide: " << buff << "\n";
 							}
 						}
-                    }
-					else if (!tmp.getRegister())
-						setUserAndNick(tmp, server);
-					else
-					{ // METTRE EN PLACE POINTEUR SUR METHODES
-						if (!strncmp(buff, "JOIN ", 5))
-							JOIN(tmp, server, buff);
-						else if (!strncmp(buff, "KICK ", 5))
+						else if (!tmp.getRegister())
 						{
-						}
-						else if (!strncmp(buff, "INVITE ", 7))
-						{
-						}
-						else if (!strncmp(buff, "TOPIC ", 6))
-						{
-						}
-						else if (!strncmp(buff, "MODE ", 5))
-						{
-						}
-						else if (!strncmp(buff, "USER ", 5))
-						{
-							server.sendMessage("462" + (std::string)buff
-								+ ":You may not reregister\r\n", tmp);
-						}
-						else if (!strncmp(buff, "NICK ", 5))
-						{
+							std::cout << "usernick entree\n";
+							if (!strncmp(buff, "USER ", 5) || !strncmp(buff, "NICK ", 5))
+							{
+								setUserAndNick(tmp, server, buff);
+								std::cout << "setusernick fini11\n";
+							}
+							else
+							{
+								std::cout << "Not registered client\n";
+								server.sendMessage("451 " + (std::string)buff + " :You have not registered\r\n", tmp);
+							}
+							std::cout << "setusernick fini\n";
 						}
 						else
-						{
+						{ // METTRE EN PLACE POINTEUR SUR METHODES
+							if (!strncmp(buff, "JOIN ", 5))
+								JOIN(tmp, server, buff);
+							else if (!strncmp(buff, "KICK ", 5))
+							{
+							}
+							else if (!strncmp(buff, "INVITE ", 7))
+							{
+							}
+							else if (!strncmp(buff, "TOPIC ", 6))
+							{
+							}
+							else if (!strncmp(buff, "MODE ", 5))
+							{
+							}
+							else if (!strncmp(buff, "USER ", 5))
+							{
+								server.sendMessage("462" + (std::string)buff + ":You may not reregister\r\n", tmp);
+							}
+							else if (!strncmp(buff, "NICK ", 5))
+							{
+							}
+							else
+							{
+							}
 						}
 					}
+					else if (bytes == 0)
+					{
+						std::cout << "\n\ntest9\n\n";
+						std::cout << "Client " << tmp.getSocket() << " déconnecté." << std::endl;
+						close(tmp.getSocket());
+						server.getClients().erase(server.getClients().begin() + (i - 1));
+						server.getFds().erase(server.getFds().begin() + i);
+						delete &tmp;
+						i--;
+						// errno(); client deco
+					}
+					else
+					{
+						std::cout << "\n\ntest91\n\n";
+						// error
+					}
 				}
-				else if (bytes == 0)
+				else if (server.getFds()[i].revents & POLLERR)
 				{
-					                    std::cout << "\n\ntest9\n\n";
-					// errno(); client deco
+					std::cout << "\n\ntest99\n\n";
 				}
-				else
+				else if (server.getFds()[i].revents & POLLHUP)
 				{
-					                    std::cout << "\n\ntest91\n\n";
-
-					// error
+					std::cout << "\n\ntest999\n\n";
 				}
-			}
-			else if (server.getFds()[i].revents & POLLERR)
-			{
-				                    std::cout << "\n\ntest99\n\n";
-
-			}
-			else if (server.getFds()[i].revents & POLLHUP)
-			{
-				                    std::cout << "\n\ntest999\n\n";
-
 			}
 		}
 	}

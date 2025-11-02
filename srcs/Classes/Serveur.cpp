@@ -3,8 +3,10 @@
 
 Server::Server(char **av)
 {
+    std::string p(av[2]);
     srv = -1;
-    this->setPassword((std::string &)av[2]);
+    this->setPassword(p);
+    std::cout << "pass " << this->pass << " " << "\n";
 	this->setPort(std::atoi(av[1]));
 }
 
@@ -35,7 +37,6 @@ int Server::createServer()
     struct pollfd server_poll;
     server_poll.fd = srv;
     server_poll.events = POLLIN;
-    this->fds.push_back(server_poll);
     this->fds.push_back(server_poll);
     return 0;
 }
@@ -76,8 +77,7 @@ bool Server::checkDoubleName(const char *name)
 
 void Server::sendMessage(std::string buffer, Client client)
 {
-
-    if (send(client.getServsocket(), buffer.c_str(), sizeof(buffer), 0) == -1)
+    if (send(client.getSocket(), buffer.c_str(), buffer.size(), 0) == -1)
     {
         std::cout << "Error sending message:" << strerror(errno) << "\n";
     }

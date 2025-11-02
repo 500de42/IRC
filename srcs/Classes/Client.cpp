@@ -46,10 +46,10 @@ void Client::setNickname(const char *name)
     nickname = name;
 }
 
-void Client::setBuffer(char *buffer)
-{
-    Buffer = buffer;
-}
+// void Client::setBuffer(char *buffer)
+// {
+//     Buffer = buffer;
+// }
 
 void Client::setOp(std::string name, bool mode)
 {

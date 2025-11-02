@@ -98,7 +98,7 @@ class Server
 std::string extractMessage(char *tmp);
 std::string extractPass(std::string pass);
 bool	extractAndSetMessageForUser(char *tmp, Client &client, Server &server);
-void	setUserAndNick(Client &client, Server &server);
+void setUserAndNick(Client &client, Server &server, char *buff);
 std::string joinVector(const std::vector<std::string> &vec, char sep);
 bool	prohibidedCharacter(std::string tmp);
 bool	prohibidedCharacterJoin(std::string tmp, bool checkFirst);
