@@ -109,3 +109,5 @@ bool searchChannelMatch(Server server, std::string name);
 bool prohibidedCharacterModePassword(std::string word);
 bool prohibitedCharacterServerPassword(std::string word);
 bool checkNum(std::string tmp);
+void processCommand(Client &client, Server &server, int bytes, size_t *i);
+void execCommand(char *buff , Client &tmp, Server &server, size_t *i);

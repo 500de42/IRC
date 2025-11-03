@@ -121,6 +121,11 @@ std::vector<Server::Channel*> &Client::getChannels()
     return this->channels;
 }
 
+std::string &Client::getRealBuffer()
+{
+    return realBuffer;
+}
+
 void Client::onRegisted()
 {
     this->isRegistred = true;

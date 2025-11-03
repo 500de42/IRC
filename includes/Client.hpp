@@ -25,6 +25,7 @@ class Client
 	std::string nickname;
 	std::string username;
 	std::string realname;
+	std::string realBuffer;
 	char Buffer[512];
 	bool goodPass;
 	bool isRegistred;
@@ -39,6 +40,7 @@ class Client
 	int getServsocket();
 	int getSocket();
 	char *getBuffer();
+	std::string &getRealBuffer();
 	struct sockaddr_in &getSockaddr();
 	bool getRegister();
 	std::string &getNickname();

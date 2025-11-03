@@ -1,6 +1,103 @@
 #include "../../includes/Serveur.hpp"
 #include "../../includes/Client.hpp"
 
+void processCommand(Client &client, Server &server, int bytes, size_t *i)
+{
+    std::string line(client.getRealBuffer());
+    std::string extract;
+    int pos;
+    
+    while (line.find("\r\n") != std::string::npos)
+    {
+        pos = line.find("\r\n");
+        extract = line.substr(0, pos);
+        execCommand((char *)extract.c_str(), client, server, i);
+        line.erase(0, pos + 2);
+    }
+}
+
+void execCommand(char *buff , Client &tmp, Server &server, size_t *i)
+{
+    std::cout << "\n\ntest8\n\n";
+    std::cout << "buffer: "<< buff << "\n\ntest9\n\n";
+    if (!tmp.getGivenPassword())
+    {
+        std::cout << "\n\ntest 10 BUFFER: " << buff << "\n\n";
+        std::string str(buff);
+        if (!strncmp(buff, "PASS ", 5))
+        {
+            std::cout << "\n\ntest extract pass: " << extractPass(str) << " PASS DU SERVER : " << server.getPass() << "\n\n";
+            if (extractPass(str) == server.getPass())
+                tmp.onPass();
+            else
+            {
+                std::cout << "\n\ntest 11 \n\n";
+                server.sendMessage("464 * :Password incorrect\r\n", tmp);
+                // close(tmp.getSocket());
+                // server.getClients().erase(server.getClients().begin() + (i - 1));
+                // server.getFds().erase(server.getFds().begin() + i);
+                // delete &tmp;
+                // i--;
+                return;
+            }
+        }
+        else 
+        {
+            server.sendMessage("464 * :Password incorrect\r\n", tmp);
+            close(tmp.getSocket());
+            server.getClients().erase(server.getClients().begin() + *i);
+            server.getFds().erase(server.getFds().begin() + (*i - 1));
+            delete &tmp;
+            i--;
+            std::cout << "Rejet de connexion. FD: " << tmp.getSocket() << " Première commande invalide: " << buff << "\n";
+            return;
+        }
+    }
+    else if (!tmp.getRegister())
+    {
+        std::cout << "usernick entree\n";
+        if (!strncmp(buff, "USER ", 5) || !strncmp(buff, "NICK ", 5))
+        {
+            setUserAndNick(tmp, server, buff);
+            std::cout << "setusernick fini11\n";
+        }
+        else
+        {
+            std::cout << "Not registered client : " << buff  << "\n";
+            server.sendMessage("451 " + (std::string)buff + " :You have not registered\r\n", tmp);
+        }
+        std::cout << "setusernick fini\n";
+    }
+    else
+    { // METTRE EN PLACE POINTEUR SUR METHODES
+        if (!strncmp(buff, "JOIN ", 5))
+            JOIN(tmp, server, buff);
+        else if (!strncmp(buff, "KICK ", 5))
+        {
+        }
+        else if (!strncmp(buff, "INVITE ", 7))
+        {
+        }
+        else if (!strncmp(buff, "TOPIC ", 6))
+        {
+        }
+        else if (!strncmp(buff, "MODE ", 5))
+        {
+        }
+        else if (!strncmp(buff, "USER ", 5))
+        {
+            server.sendMessage("462" + (std::string)buff + ":You may not reregister\r\n", tmp);
+        }
+        else if (!strncmp(buff, "NICK ", 5))
+        {
+        }
+        else
+        {
+        }
+    }
+}
+
+
 std::string joinVector(const std::vector<std::string> &vec, char sep)
 {
     std::string result;
@@ -25,13 +122,17 @@ bool extractAndSetMessageForUser(char *tmp, Client &client, Server &server)
     while (ss >> l)
         tab.push_back(l);
     std::cout << "test u1 size: " << tab.size() << std::endl;
-    if (tab.size() < 5)
+    if (tab.size() < 4)
+    {
+        std::cout << "test u2 size: " << tab.size() << std::endl;
+        server.sendMessage("461 5:Not enough parameters\r\n", client);   
         return false;
+    }
     if (tab[4][0] != ':')
         return false;
     std::cout << "test u1" << std::endl;
     tab[4].erase(0, 1);
-    if (tab.size() < 5)
+    if (tab.size() != 5)
     {
         std::vector<std::string> vec(tab.begin() + 4, tab.end());
         l = joinVector(vec, ' ');
@@ -39,8 +140,8 @@ bool extractAndSetMessageForUser(char *tmp, Client &client, Server &server)
     }
     if (prohibidedCharacter(tab[1]) || prohibidedCharacter(tab[4]))
     {
-        std::cout << "test u2" << std::endl;
-        server.sendMessage("461" + tab[1] + ":Not enough parameters\r\n", client);   
+        std::cout << "test u2 tab 1: " << prohibidedCharacter(tab[1]) << "tab2 : " << prohibidedCharacter(tab[4]) << std::endl;
+        server.sendMessage("461 22" + tab[1] + ":Not enough parameters\r\n", client);   
         return false;
     }
     // if (server.checkDoubleName(tab[1].c_str()))
@@ -109,11 +210,15 @@ void setUserAndNick(Client &client, Server &server, char *buff)
             if (!extractAndSetMessageForUser(buff, client, server))
             {    std::cout << "test user3" << std::endl;
                 // ERR_ALREADYREGISTRED();
-                server.sendMessage("\r\n", client);//erreur a ecrire et envoyer au client
+                // server.sendMessage("\r\n", client);//erreur a ecrire et envoyer au client
+                return;
             }
         }
         else
+        {
             server.sendMessage("\r\n", client);//erreur a ecrire et envoyer au client
+            return;
+        }
         std::cout << "test user4" << std::endl;
     }
     else if (!strncmp(buff, "NICK", 4))
@@ -234,4 +339,3 @@ bool prohibitedCharacterServerPassword(std::string word)
     }
     return false;
 }
-
