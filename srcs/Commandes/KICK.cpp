@@ -2,6 +2,7 @@
 #include "../../includes/Client.hpp"
 #include "../../includes/Channel.hpp"
 
+//CHECK LES ARGUMENTS DE LA COMMANDE
 
 void    KICK(Server &server, Client &client, const char *tmp)
 {
@@ -15,7 +16,7 @@ void    KICK(Server &server, Client &client, const char *tmp)
         server.sendMessage("461 " + client.getNickname() + " KICK :Not enough parameters\r\n", client);
         return;
     }
-    else 
+    else
     {
         while (ss >> w)
             words.push_back(w); // join les messages apres le ':'
@@ -27,6 +28,19 @@ void    KICK(Server &server, Client &client, const char *tmp)
             server.sendMessage("461 " + client.getNickname() + " KICK :Not enough parameters\r\n", client);
             return;
         }
+        if (words.size() >= 4)
+        {
+            int pos = buff.find(':');
+            if (pos)
+            {
+                words[3] = buff.substr(pos);
+            }
+            else
+            {
+                server.sendMessage("461 " + client.getNickname() + " KICK :Not enough parameters\r\n", client);
+                return;
+            }
+        }
         try
         {
             Server::Channel &channel = ChannelMatch(server, words[0]);
@@ -37,16 +51,6 @@ void    KICK(Server &server, Client &client, const char *tmp)
                 return;
             }
             if (client.getOp(channel.getName()))
-            {
-                server.sendMessage("482 " + client.getNickname() + " KICK :You not channel operator\r\n", client);
-                return;
-            }
-            if (!searchMembers(words[1], channel))
-            {
-                server.sendMessage("441 " + client.getNickname() + " KICK :The target is not channel member\r\n", client);
-                return;
-            }
-            if (!searchMembers(words[1], channel))
             {
                 server.sendMessage("482 " + client.getNickname() + " KICK :You not channel operator\r\n", client);
                 return;
@@ -83,4 +87,7 @@ void execKick(Server::Channel &channel, std::vector<std::string> words, Client &
 {
     removeChannelMember(channel, target);
     sendMessageAllClientKick(server, words);
+    std::map<std::string, bool>::iterator it = target.getOpMap().find(channel.getName());
+    if (it != target.getOpMap().end())
+        target.getOpMap().erase(it);
 }

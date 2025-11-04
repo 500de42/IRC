@@ -74,6 +74,7 @@ void execCommand(char *buff , Client &tmp, Server &server, size_t *i)
             JOIN(tmp, server, buff + 4);
         else if (!strncmp(buff, "KICK ", 5))
         {
+            KICK(server, tmp, buff);
         }
         else if (!strncmp(buff, "INVITE ", 7))
         {
