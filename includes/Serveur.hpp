@@ -95,19 +95,36 @@ class Server
 		char *buffer;	
 };
 
-std::string extractMessage(char *tmp);
-std::string extractPass(std::string pass);
-bool	extractAndSetMessageForUser(char *tmp, Client &client, Server &server);
-void setUserAndNick(Client &client, Server &server, char *buff);
-std::string joinVector(const std::vector<std::string> &vec, char sep);
-bool	prohibidedCharacter(std::string tmp);
-bool	prohibidedCharacterJoin(std::string tmp, bool checkFirst);
-void	JOIN(Client &client, Server &server, const char *tmp);
-Server::Channel &ChannelMatch(Server server, std::string name);
-std::vector<std::string> splitCommand(std::string command, char c);
-bool searchChannelMatch(Server server, std::string name);
-bool prohibidedCharacterModePassword(std::string word);
-bool prohibitedCharacterServerPassword(std::string word);
-bool checkNum(std::string tmp);
-void processCommand(Client &client, Server &server, int bytes, size_t *i);
-void execCommand(char *buff , Client &tmp, Server &server, size_t *i);
+
+
+/////////////////////				UTILS					////////////////////
+
+
+	std::string extractMessage(char *tmp);
+	std::string extractPass(std::string pass);
+	std::string joinVector(const std::vector<std::string> &vec, char sep);
+	bool	prohibidedCharacter(std::string tmp);
+	bool	prohibidedCharacterJoin(std::string tmp, bool checkFirst);
+	Server::Channel &ChannelMatch(Server server, std::string name);
+	std::vector<std::string> splitCommand(std::string command, char c);
+	bool 	searchChannelMatch(Server server, std::string name);
+	bool 	prohibidedCharacterModePassword(std::string word);
+	bool 	prohibitedCharacterServerPassword(std::string word);
+	bool 	checkNum(std::string tmp);
+	bool 	searchMembers(std::string name, Server::Channel channel);
+	Client 	&clientMatch(std::string name,  Server server);
+	void removeChannelMember(Server::Channel &channel, Client &client);
+	void sendMessageAllClientKick(Server &server, std::vector<std::string> words);
+
+
+/////////////////////				COMMANDES				/////////////////////
+
+
+	void 	MODE(Server &server, Client &client, const char *tmp);
+	bool	extractAndSetMessageForUser(char *tmp, Client &client, Server &server);
+	void 	setUserAndNick(Client &client, Server &server, char *buff);
+	void 	processCommand(Client &client, Server &server, int bytes, size_t *i);
+	void 	execCommand(char *buff , Client &tmp, Server &server, size_t *i);
+	void	JOIN(Client &client, Server &server, const char *tmp);
+	void    KICK(Server &server, Client &client, const char *buff);
+	void 	execKick(Server::Channel &channel, std::vector<std::string> words, Client &target, Server server);

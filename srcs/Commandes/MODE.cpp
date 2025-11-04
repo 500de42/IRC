@@ -30,14 +30,15 @@ void extractAndSetMode(Client &client, Server &server, std::string tmp)
     
     while (ss >> w)
         word.push_back(w);
-    if (word.size() < 1 || word.empty())
-    {
-        server.sendMessage("461 " + client.getNickname() + " MODE :Too many parameters\r\n", client);
-        return ;
-    }
+    word.erase(word.begin());
+    // if (word.size() < 1 || word.empty())
+    // {
+    //     server.sendMessage("461 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
+    //     return ;
+    // }
     if (word[0][0] != '#')
     {
-        server.sendMessage("", client);
+        server.sendMessage("461 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
         return;
     }
     try{

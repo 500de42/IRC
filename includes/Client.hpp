@@ -36,6 +36,7 @@ class Client
 
 	// std::string getIpAddr();
 	bool getOp(std::string name);
+
 	bool getGivenPassword();
 	int getServsocket();
 	int getSocket();
@@ -47,7 +48,7 @@ class Client
 	std::string &getUsername();
 	std::string &getRealname();
 	std::vector<Server::Channel *> &getChannels();
-
+	std::map<std::string, bool> &getOpMap();
 	//      SET     //
 
 	void setServsocket(int nb);

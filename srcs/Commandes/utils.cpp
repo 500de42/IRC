@@ -83,6 +83,7 @@ void execCommand(char *buff , Client &tmp, Server &server, size_t *i)
         }
         else if (!strncmp(buff, "MODE ", 5))
         {
+            MODE(server, tmp, buff);
         }
         else if (!strncmp(buff, "USER ", 5))
         {
@@ -110,56 +111,6 @@ std::string joinVector(const std::vector<std::string> &vec, char sep)
     return result;
 }
 
-bool extractAndSetMessageForUser(char *tmp, Client &client, Server &server)
-{
-    if (!tmp)
-        return false;
-
-    std::stringstream ss(tmp);
-    std::string l;
-    std::vector<std::string> tab;
-
-    while (ss >> l)
-        tab.push_back(l);
-    std::cout << "test u1 size: " << tab.size() << std::endl;
-    if (tab.size() < 4)
-    {
-        std::cout << "test u2 size: " << tab.size() << std::endl;
-        server.sendMessage("461 5:Not enough parameters\r\n", client);   
-        return false;
-    }
-    if (tab[4][0] != ':')
-        return false;
-    std::cout << "test u1" << std::endl;
-    tab[4].erase(0, 1);
-    if (tab.size() != 5)
-    {
-        std::vector<std::string> vec(tab.begin() + 4, tab.end());
-        l = joinVector(vec, ' ');
-        tab[4] = l;
-    }
-    if (prohibidedCharacter(tab[1]) || prohibidedCharacter(tab[4]))
-    {
-        std::cout << "test u2 tab 1: " << prohibidedCharacter(tab[1]) << "tab2 : " << prohibidedCharacter(tab[4]) << std::endl;
-        server.sendMessage("461 22" + tab[1] + ":Not enough parameters\r\n", client);   
-        return false;
-    }
-    // if (server.checkDoubleName(tab[1].c_str()))
-    if (client.getUsername().empty())
-    {
-        std::cout << "USER set" << std::endl;
-        client.setUsername(tab[1].c_str());
-        client.setRealname(tab[4].c_str());
-    }
-    else
-    {
-        std::cout << "test u4" << std::endl;
-        server.sendMessage("462" + tab[1] + ":You may not reregister\r\n", client);
-        return false;
-    }
-    return (true);
-}
-
 bool prohibidedCharacter(std::string tmp)
 {
     for (std::string::iterator i = tmp.begin(); i != tmp.end(); i++)
@@ -174,12 +125,6 @@ bool prohibidedCharacter(std::string tmp)
     return false;
 }
 
-// template <typename T>
-// void sendMessage(T c, std::string buffer)
-// {
-//     T.send
-// }
-
 std::string extractMessage(char *tmp)
 {
     if (!tmp)
@@ -189,70 +134,6 @@ std::string extractMessage(char *tmp)
     if (line.size() > 2 && tmp[0] != ' ')
         return "";
     return line;
-}
-
-// bool parsingSetUser(std::vector<std::string> &tab)
-// {
-    
-// }
-
-void setUserAndNick(Client &client, Server &server, char *buff)
-{
-    std::string line;
-    std::vector<std::string> mess;
-    std::cout << "|" << buff << "| " << strlen(buff) << std::endl;
-    if (!strncmp(buff, "USER", 4))
-    {
-        std::cout << "test user1" << std::endl;
-        if (client.getUsername().empty())          
-        {
-            std::cout << "test user2" << std::endl;
-            if (!extractAndSetMessageForUser(buff, client, server))
-            {    std::cout << "test user3" << std::endl;
-                // ERR_ALREADYREGISTRED();
-                // server.sendMessage("\r\n", client);//erreur a ecrire et envoyer au client
-                return;
-            }
-        }
-        else
-        {
-            server.sendMessage("\r\n", client);//erreur a ecrire et envoyer au client
-            return;
-        }
-        std::cout << "test user4" << std::endl;
-    }
-    else if (!strncmp(buff, "NICK", 4))
-    {
-        std::cout << "test nick" << std::endl;
-        line = extractMessage(buff + 4);
-        if (!line.empty() && !prohibidedCharacter(line))
-        {
-            if (server.checkDoubleName(line.c_str()))
-                client.setNickname(line.c_str());
-            else
-            {
-                server.sendMessage("462" + line + ":You may not reregister\r\n", client);
-                return ;
-            }
-        }
-        else
-        {
-            server.sendMessage("432" + line + ":Erroneous nickname\r\n", client);
-            return;
-        }
-    }
-    if (!client.getNickname().empty() && !client.getUsername().empty())
-    {
-        std::cout << "Nouvelle connexion acceptée. FD: "  << client.getSocket() << std::endl;
-        client.onRegisted();
-        server.sendMessage("001" + client.getNickname() +  " :Welcome to the Internet Relay Network " + client.getNickname() + "!" + client.getUsername() + "@127.0.0.1", client);
-    }
-    else
-    {
-        // server.sendMessage("\r\n", client);
-        std::cout << "buu\n";
-    }
-    std::cout << "setusernick fini0\n";
 }
 
 bool searchChannelMatch(Server server, std::string name)
@@ -273,6 +154,16 @@ Server::Channel &ChannelMatch(Server server, std::string name)
             return *server.getChannels()[i];
     }
     throw std::runtime_error("Channel not found");
+}
+
+Client &clientMatch(std::string name, Server server)
+{
+    for(size_t i = 0; i < server.getClients().size(); i++)
+    {
+        if (name == server.getClients()[i]->getNickname())
+            return *server.getClients()[i];
+    }
+    throw std::runtime_error("Client not found");
 }
 
 bool prohibidedCharacterJoin(std::string tmp, bool checkFirst)
@@ -338,4 +229,44 @@ bool prohibitedCharacterServerPassword(std::string word)
             return true;
     }
     return false;
+}
+
+bool searchMembers(std::string name, Server::Channel channel)
+{
+    for(size_t i = 0; i < channel.getMembers().size(); i++)
+    {
+        if (channel.getMembers()[i]->getNickname() == name)
+            return true;  
+    }
+    return false;
+}
+
+void removeChannelMember(Server::Channel &channel, Client &client)
+{
+    for(size_t i = 0; i < channel.getMembers().size(); i++)
+    {
+        if (channel.getMembers()[i]->getNickname() == client.getNickname())
+        {
+            channel.getMembers().erase(channel.getMembers().begin() + i);
+            for(size_t it = 0; it < client.getChannels().size(); it++)
+            {
+                if (client.getChannels()[i]->getName() == channel.getName())
+                {
+                    client.getChannels().erase(client.getChannels().begin() + it);
+                    
+                }
+                // if (client.getOpMap()) set pour enlever l op map
+            }
+            return ;
+        }
+    }
+    return ;
+}
+
+void sendMessageAllClientKick(Server &server, std::vector<std::string> words)
+{   
+    for(size_t i = 0; i < server.getClients().size(); i++)
+    {
+        server.sendMessage(words[1] + ": KICK: #" + words[0] + " " + words[2], *server.getClients()[i]);
+    }
 }

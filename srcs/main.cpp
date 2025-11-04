@@ -48,9 +48,7 @@ int	main(int ac, char **av)
 					server.getFds().push_back(server_poll);
 				}
                 else
-                {
                     std::cout << "error addind client in vector\n\n";
-                }
 			}}
             // std::cout << "\n\ntest4\n\n";
 		if (server.getClients().size())
@@ -75,7 +73,7 @@ int	main(int ac, char **av)
 						tmp.getRealBuffer().append(buff, bytes);
 						processCommand(tmp, server, bytes, &i);
 					}
-					else if (bytes == 0)
+					else if (bytes == 0) //client deco
 					{
 						std::cout << "\n\ntest9\n\n";
 						std::cout << "Client " << tmp.getSocket() << " déconnecté." << std::endl;
@@ -84,12 +82,10 @@ int	main(int ac, char **av)
 						server.getFds().erase(server.getFds().begin() + i);
 						delete &tmp;
 						i--;
-						// errno(); client deco
 					}
-					else
+					else // error
 					{
 						std::cout << "\n\ntest91\n\n";
-						// error
 					}
 				}
 				else if (server.getFds()[i].revents & POLLERR)
