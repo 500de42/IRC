@@ -67,7 +67,7 @@ int	main(int ac, char **av)
 					std::cout << "size of vector client " << server.getClients().size() << std::endl; 
 					std::cout << server.getClients()[i - 1]->getSocket() << "\n\n";                
 					std::cout << "\n\ntest7.5\n\n";
-					memset(buff, 0, strlen(buff));
+					memset(buff, 0, 512);
 					bytes = recv(server.getFds()[i].fd, buff, sizeof(buff) - 1, 0);
 					std::cout << "\n\ntest7.7\n\n";
 					if (bytes > 0)

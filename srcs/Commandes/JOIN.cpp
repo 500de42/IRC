@@ -47,8 +47,6 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
                 channel.getMembers().push_back(&client);
                 channel.setOperator(client);
                 channel.setName(word[i]);
-                if(word.size() == 2)
-                    channel.setPasssword(passwordCommand[i]);
                 client.getChannels().push_back(&channel);
                 server.getChannels().push_back(&channel);
             }
@@ -59,6 +57,7 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
                     Server::Channel &channel = ChannelMatch(server, word[i]);
                     if (channel.getK())
                     {
+
                         if (word.size() == 2 && channel.getPass() == passwordCommand[i])
                         {
                             if (channel.getL() && channel.getMembers().size() + 1 > channel.getMembersLimit())

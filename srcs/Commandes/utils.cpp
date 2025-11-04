@@ -3,7 +3,7 @@
 
 void processCommand(Client &client, Server &server, int bytes, size_t *i)
 {
-    std::string line(client.getRealBuffer());
+    std::string &line = client.getRealBuffer();
     std::string extract;
     int pos;
     
@@ -33,11 +33,11 @@ void execCommand(char *buff , Client &tmp, Server &server, size_t *i)
             {
                 std::cout << "\n\ntest 11 \n\n";
                 server.sendMessage("464 * :Password incorrect\r\n", tmp);
-                // close(tmp.getSocket());
-                // server.getClients().erase(server.getClients().begin() + (i - 1));
-                // server.getFds().erase(server.getFds().begin() + i);
-                // delete &tmp;
-                // i--;
+                close(tmp.getSocket());
+                server.getClients().erase(server.getClients().begin() + ((*i) - 1));
+                server.getFds().erase(server.getFds().begin() + (*i));
+                delete &tmp;
+                (*i)--;
                 return;
             }
         }
@@ -64,14 +64,14 @@ void execCommand(char *buff , Client &tmp, Server &server, size_t *i)
         else
         {
             std::cout << "Not registered client : " << buff  << "\n";
-            server.sendMessage("451 " + (std::string)buff + " :You have not registered\r\n", tmp);
+            server.sendMessage("451 " + (std::string)buff + " :You may not registered\r\n", tmp);
         }
         std::cout << "setusernick fini\n";
     }
     else
     { // METTRE EN PLACE POINTEUR SUR METHODES
         if (!strncmp(buff, "JOIN ", 5))
-            JOIN(tmp, server, buff);
+            JOIN(tmp, server, buff + 4);
         else if (!strncmp(buff, "KICK ", 5))
         {
         }
@@ -147,7 +147,7 @@ bool extractAndSetMessageForUser(char *tmp, Client &client, Server &server)
     // if (server.checkDoubleName(tab[1].c_str()))
     if (client.getUsername().empty())
     {
-        std::cout << "test u3" << std::endl;
+        std::cout << "USER set" << std::endl;
         client.setUsername(tab[1].c_str());
         client.setRealname(tab[4].c_str());
     }
@@ -277,7 +277,7 @@ Server::Channel &ChannelMatch(Server server, std::string name)
 
 bool prohibidedCharacterJoin(std::string tmp, bool checkFirst)
 {
-    if (checkFirst && tmp[0] != '#')
+    if (checkFirst && tmp[0] != '#' && tmp[0] != '&')
         return true;
     for (std::string::iterator i = tmp.begin(); i != tmp.end(); i++)
     {
