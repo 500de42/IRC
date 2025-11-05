@@ -33,7 +33,7 @@ void Server::Channel::setOffOperator(Client &client)
         if (client.getNickname() == this->operators[i]->getNickname())
         {
             operators.erase(operators.begin() + i);
-            client.setOp("", false); // ajouter une option pour enlever exactement l index de l op dans la map
+            client.setOffOpMap(name); 
         }
     }
 }

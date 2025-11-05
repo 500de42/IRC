@@ -34,9 +34,8 @@ class Client
   public:
 	//      GET     //
 
-	// std::string getIpAddr();
-	bool getOp(std::string name);
 
+	bool getOp(std::string name);
 	bool getGivenPassword();
 	int getServsocket();
 	int getSocket();
@@ -49,6 +48,7 @@ class Client
 	std::string &getRealname();
 	std::vector<Server::Channel *> &getChannels();
 	std::map<std::string, bool> &getOpMap();
+
 	//      SET     //
 
 	void setServsocket(int nb);
@@ -60,6 +60,7 @@ class Client
 	void onRegisted();
 	void onPass();
 	void setOp(std::string name, bool mode);
+	void setOffOpMap(std::string name);
 	Client(int port);
 	//              //
 

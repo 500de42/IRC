@@ -73,9 +73,7 @@ void execCommand(char *buff , Client &tmp, Server &server, size_t *i)
         if (!strncmp(buff, "JOIN ", 5))
             JOIN(tmp, server, buff + 4);
         else if (!strncmp(buff, "KICK ", 5))
-        {
             KICK(server, tmp, buff);
-        }
         else if (!strncmp(buff, "INVITE ", 7))
         {
         }
@@ -83,13 +81,9 @@ void execCommand(char *buff , Client &tmp, Server &server, size_t *i)
         {
         }
         else if (!strncmp(buff, "MODE ", 5))
-        {
             MODE(server, tmp, buff);
-        }
         else if (!strncmp(buff, "USER ", 5))
-        {
             server.sendMessage("462" + (std::string)buff + ":You may not reregister\r\n", tmp);
-        }
         else if (!strncmp(buff, "NICK ", 5))
         {
         }
@@ -179,34 +173,27 @@ bool prohibidedCharacterJoin(std::string tmp, bool checkFirst)
     return false;
 }
 
-std::vector<std::string> splitCommand(std::string command, char c)
-{
-    std::vector<std::string> word;
-    std::string w;
-    int first = 0;
-    
-    for (std::string::iterator i = command.begin(); i != command.end(); i++)
-    {
-        if (*i == c)
-        {
-            std::string::iterator other = i;
-            if (first == 0)
-            {
-                std::string tmp(command.begin(), i);
-                first = 1;
-                word.push_back(tmp);
-            }
-            else
-            {
-                std::string tmp(other + 1, i);
-                word.push_back(tmp);
-            }
-        }
-    }
-    if (!first)
-        word.push_back(command);
-    return word;
-}
+// std::vector<std::string> splitCommand(std::string command, char c)
+// {
+//     std::vector<std::string> word;
+//     std::string w;
+//     int start = 0;
+//     int end = 0;
+
+//     while(command[end])
+//     {
+//         while (command[end] != c && command[end])
+//             end++;
+//         std::string tmp = command.substr(start, end - start);
+//         word.push_back(tmp);
+//         while(command[end] == c)
+//             end++;
+//         start = end;
+//     }
+//     if (!first)
+//         word.push_back(command);
+//     return word;
+// }
 
 std::string extractPass(std::string pass)
 {
@@ -252,11 +239,7 @@ void removeChannelMember(Server::Channel &channel, Client &client)
             for(size_t it = 0; it < client.getChannels().size(); it++)
             {
                 if (client.getChannels()[i]->getName() == channel.getName())
-                {
                     client.getChannels().erase(client.getChannels().begin() + it);
-                    
-                }
-                // if (client.getOpMap()) set pour enlever l op map
             }
             return ;
         }
@@ -264,10 +247,34 @@ void removeChannelMember(Server::Channel &channel, Client &client)
     return ;
 }
 
-void sendMessageAllClientKick(Server &server, std::vector<std::string> words)
+void sendMessageAllClientKick(Server &server, Server::Channel &channel, std::vector<std::string> words)
 {   
-    for(size_t i = 0; i < server.getClients().size(); i++)
+    for(size_t i = 0; i < channel.getMembers().size(); i++)
     {
-        server.sendMessage(words[1] + ": KICK: #" + words[0] + " " + words[2], *server.getClients()[i]);
+        server.sendMessage(words[1] + ": KICK: #" + words[0] + " " + words[2] + "\r\n", *channel.getMembers()[i]);
     }
+}
+
+
+std::vector<std::string> removeCharacter(std::vector<std::string> vec, char c)
+{
+    std::vector<std::string> word;
+    std::string w;
+    int check = 0;
+    
+    for (std::vector<std::string>::iterator it = vec.begin(); it != vec.end(); it++)
+    {    
+        for (int i = 0; i < (*it).size(); i++)
+        {
+            if ((*it)[i] == c)
+            {
+                check++;
+                (*it).erase(i);
+                word.push_back((*it));
+            }
+        }
+    }
+    if (!check)
+        return vec;
+    return word;
 }

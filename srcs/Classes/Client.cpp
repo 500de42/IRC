@@ -46,10 +46,20 @@ void Client::setNickname(const char *name)
     nickname = name;
 }
 
-// void Client::setBuffer(char *buffer)
-// {
-//     Buffer = buffer;
-// }
+
+std::map<std::string, bool> &Client::getOpMap()
+{
+    return channelOp;
+}
+
+void Client::setOffOpMap(std::string channelName)
+{
+    for(std::map<std::string, bool>::iterator i = channelOp.begin(); i != channelOp.end(); i++)
+    {
+        if (channelName == i->first)
+            channelOp.erase(i);
+    }
+}
 
 void Client::setOp(std::string name, bool mode)
 {
@@ -59,7 +69,7 @@ bool Client::getOp(std::string name)
 {
     for(std::map<std::string, bool>::iterator i = channelOp.begin(); i != channelOp.end(); i++)
     {
-        if (i->first == name)
+        if (i->first == name && i->second == true)
             return i->second;
     }
     return false;

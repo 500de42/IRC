@@ -66,7 +66,7 @@ void Server::closeAllSockets()
 bool Server::checkDoubleName(const char *name)
 {
     if (!name)
-        return false;
+        return true;
     for(size_t i = 0; i < this->getClients().size(); i++)
     {
         if (name == this->getClients()[i]->getUsername())

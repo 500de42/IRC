@@ -10,6 +10,7 @@ void    KICK(Server &server, Client &client, const char *tmp)
     std::stringstream ss(tmp);
     std::string w;
     std::vector<std::string> words;
+    std::vector<std::string> targetsList;
 
     if (buff.size() < 3)
     {
@@ -28,12 +29,13 @@ void    KICK(Server &server, Client &client, const char *tmp)
             server.sendMessage("461 " + client.getNickname() + " KICK :Not enough parameters\r\n", client);
             return;
         }
-        if (words.size() >= 4)
+        if (words.size() >= 3)
         {
             int pos = buff.find(':');
             if (pos)
             {
-                words[3] = buff.substr(pos);
+                words[2] = buff.substr(pos);
+                words[2].erase(0);
             }
             else
             {
@@ -50,44 +52,49 @@ void    KICK(Server &server, Client &client, const char *tmp)
                 server.sendMessage("442 " + client.getNickname() + " KICK :You are not channel member\r\n", client);
                 return;
             }
-            if (client.getOp(channel.getName()))
+            if (!client.getOp(channel.getName()))
             {
                 server.sendMessage("482 " + client.getNickname() + " KICK :You not channel operator\r\n", client);
                 return;
             }
-            try
+            targetsList[0] = words[1];
+            if (words[1].find(','))
+                targetsList = splitCommand(words[1], ',');
+            
+            for(std::vector<std::string>::iterator it = targetsList.begin(); it != targetsList.end(); it++)
             {
-                Client &target = clientMatch(words[1], server);
-
-                if (!searchMembers(target.getNickname(), channel))
+                try
                 {
-                    server.sendMessage("441 " + client.getNickname() + " KICK :The target is not channel member\r\n", client);
-                    return;
+                    Client &target = clientMatch(*it, server);
+                
+                    if (!searchMembers(target.getNickname(), channel))
+                    {
+                        server.sendMessage("441 " + client.getNickname() + " KICK :The target is not channel member\r\n", client);
+                       continue;
+                    }
+                    if (target.getOp(channel.getName()))
+                    {
+                        server.sendMessage("482 " + client.getNickname() + " KICK :The target is channel operator, you can't remove it\r\n", client);
+                        continue;
+                    }
+                    execKick(channel, words, target, server);
                 }
-                if (target.getOp(channel.getName()))
+                catch(const std::exception& e)
                 {
-                    server.sendMessage("482 " + client.getNickname() + " KICK :The target is channel operator, you can't remove it\r\n", client);
-                    return;
+                    server.sendMessage("401 " + client.getNickname() + " KICK :The target don't exist\r\n", client);
                 }
-                execKick(channel, words, target, server);
             }
-            catch(const std::exception& e)
-            {
-                server.sendMessage("403 " + client.getNickname() + " KICK :Client not found\r\n", client);
-            }
+            sendMessageAllClientKick(server, channel, words);
         }
         catch(const std::exception& e)
         {
             server.sendMessage("403 " + client.getNickname() + " KICK :Channel don't exist\r\n", client);
-        }
+        } 
     }
 }
 
 void execKick(Server::Channel &channel, std::vector<std::string> words, Client &target, Server server)
 {
     removeChannelMember(channel, target);
-    sendMessageAllClientKick(server, words);
-    std::map<std::string, bool>::iterator it = target.getOpMap().find(channel.getName());
-    if (it != target.getOpMap().end())
-        target.getOpMap().erase(it);
+    channel.setOffOperator(target);
 }
