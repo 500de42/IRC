@@ -8,7 +8,7 @@ void setUserAndNick(Client &client, Server &server, char *buff)
     std::string line;
     std::vector<std::string> mess;
     std::cout << "|" << buff << "| " << strlen(buff) << std::endl;
-    if (!strncmp(buff, "USER", 4))
+    if (!strncmp(buff, "USER ", 5))
     {
         std::cout << "test user1" << std::endl;
         if (client.getUsername().empty())          
@@ -28,12 +28,12 @@ void setUserAndNick(Client &client, Server &server, char *buff)
         }
         std::cout << "test user4" << std::endl;
     }
-    else if (!strncmp(buff, "NICK", 4))
+    else if (!strncmp(buff, "NICK ", 5))
     {
         std::cout << "test nick" << std::endl;
         line = extractMessage(buff + 4);
         if (!line.empty() && !prohibidedCharacter(line))
-        {
+        {std::cout << " NICKNAME : |" << line << std::endl;
             if (server.checkDoubleName(line.c_str()))
                 client.setNickname(line.c_str());
             else
@@ -52,7 +52,7 @@ void setUserAndNick(Client &client, Server &server, char *buff)
     {
         std::cout << "Nouvelle connexion acceptée. FD: "  << client.getSocket() << std::endl;
         client.onRegisted();
-        server.sendMessage("001" + client.getNickname() +  " :Welcome to the Internet Relay Network " + client.getNickname() + "!" + client.getUsername() + "@127.0.0.1", client);
+        server.sendMessage("001 " + client.getNickname() +  " :Welcome to the Internet Relay Network " + client.getNickname() + "!" + client.getUsername() + "@127.0.0.1", client);
     }
     else
     {
@@ -80,25 +80,26 @@ bool extractAndSetMessageForUser(char *tmp, Client &client, Server &server)
         server.sendMessage("461 5:Not enough parameters\r\n", client);   
         return false;
     }
-    if (tab[4][0] != ':')
-        return false;
     std::cout << "test u1" << std::endl;
-    tab[4].erase(0, 1);
-    if (tab.size() != 5)
+    
+    if (tab.size() > 4)
     {
+        if (tab[4][0] != ':')
+            return false;
+        tab[4].erase(0, 1);
         std::vector<std::string> vec(tab.begin() + 4, tab.end());
         l = joinVector(vec, ' ');
         tab[4] = l;
     }
-    if (prohibidedCharacter(tab[1]) || prohibidedCharacter(tab[4]))
+    if (prohibidedCharacter(tab[1]) || tab[4].size() && prohibidedCharacter(tab[4]))
     {
         std::cout << "test u2 tab 1: " << prohibidedCharacter(tab[1]) << "tab2 : " << prohibidedCharacter(tab[4]) << std::endl;
         server.sendMessage("461 22" + tab[1] + ":Not enough parameters\r\n", client);   
         return false;
     }
-    // if (server.checkDoubleName(tab[1].c_str()))
     if (client.getUsername().empty())
     {
+        std::cout << " USERNAME : " << tab[1] << " " << tab[4] << std::endl;
         std::cout << "USER set" << std::endl;
         client.setUsername(tab[1].c_str());
         client.setRealname(tab[4].c_str());

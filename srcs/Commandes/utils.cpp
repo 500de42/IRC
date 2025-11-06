@@ -126,8 +126,11 @@ std::string extractMessage(char *tmp)
         return "";
     std::string line(tmp);
 
-    if (line.size() > 2 && tmp[0] != ' ')
+    std::cout << "|" << line << "|" << std::endl;
+    if (line.size() < 2 && tmp[0] != ' ')
         return "";
+    line.erase(0, 1);
+    std::cout << "|" << line << "|" << std::endl;
     return line;
 }
 
@@ -173,27 +176,29 @@ bool prohibidedCharacterJoin(std::string tmp, bool checkFirst)
     return false;
 }
 
-// std::vector<std::string> splitCommand(std::string command, char c)
-// {
-//     std::vector<std::string> word;
-//     std::string w;
-//     int start = 0;
-//     int end = 0;
+std::vector<std::string> splitCommand(std::string command, char c)
+{
+    std::vector<std::string> word;
+    int start = 0;
+    int end = 0;
+    if (command.find(c) == std::string::npos)
+    {
+        word.push_back(command);
+        return word;
+    }
+    while(command[end])
+    {
+        while(command[end] == c && command[end])
+            end++; 
+        start = end;               
+        while (command[end] != c && command[end])
+            end++;
+        std::string tmp = command.substr(start, end - start);
+        word.push_back(tmp);
+    }
 
-//     while(command[end])
-//     {
-//         while (command[end] != c && command[end])
-//             end++;
-//         std::string tmp = command.substr(start, end - start);
-//         word.push_back(tmp);
-//         while(command[end] == c)
-//             end++;
-//         start = end;
-//     }
-//     if (!first)
-//         word.push_back(command);
-//     return word;
-// }
+    return word;
+}
 
 std::string extractPass(std::string pass)
 {
@@ -261,7 +266,7 @@ std::vector<std::string> removeCharacter(std::vector<std::string> vec, char c)
     std::vector<std::string> word;
     std::string w;
     int check = 0;
-    
+    std::cout << vec[0] << " " << vec[1] << " " << vec[2] << std::endl;
     for (std::vector<std::string>::iterator it = vec.begin(); it != vec.end(); it++)
     {    
         for (int i = 0; i < (*it).size(); i++)
@@ -269,7 +274,7 @@ std::vector<std::string> removeCharacter(std::vector<std::string> vec, char c)
             if ((*it)[i] == c)
             {
                 check++;
-                (*it).erase(i);
+                (*it).erase(i, 1);
                 word.push_back((*it));
             }
         }

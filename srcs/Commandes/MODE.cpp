@@ -41,6 +41,7 @@ void extractAndSetMode(Client &client, Server &server, std::string tmp)
         server.sendMessage("461 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
         return;
     }
+    word[0].erase(0, 1);
     try{
         Server::Channel &channel = ChannelMatch(server, word[0]);
         if (client.getOp(channel.getName()) == false)
@@ -52,7 +53,7 @@ void extractAndSetMode(Client &client, Server &server, std::string tmp)
     }
     catch(std::exception &e)
     {
-        server.sendMessage("403 " + client.getNickname() + " MODE :Channel does not exist\r\n", client);
+        server.sendMessage("403 1" + client.getNickname() + " MODE :Channel does not exist\r\n", client);
         return;
     }
 }
@@ -60,16 +61,20 @@ void extractAndSetMode(Client &client, Server &server, std::string tmp)
 void setModeOnChannel(std::vector<std::string> word, Client &client, Server &server, Server::Channel &channel)
 {
     std::map<char, bool> option;
-    int nbParameters = word.size() - 2;
+    int nbParameters = word.size() - 1;
     int executedParameters = 0;
+    std::cout << "nbparametre1: " << nbParameters << " executedParameters1 " << executedParameters  << "word: " << word[0] << " " << word[1] << " size: "<< word.size() << std::endl;
 
     if (prohibidedCharacterMode(word[1], false))
     {
         server.sendMessage("461 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
         return;   
     }
-    if (*word[1].begin() != '+' || *word[1].begin() != '-')//message a bien set
-        server.sendMessage("403 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
+    if (*word[1].begin() != '+' && *word[1].begin() != '-')//message a bien set
+    {
+        std::cout << "word : " << *word[1].begin() << " " << word[1] << std::endl;
+        server.sendMessage("403 2" + client.getNickname() + " MODE :Not enough parameters\r\n", client);
+    }
     for (std::string::iterator i = word[1].begin(); i != word[1].end(); i++)
     {
         if (*i == '+' || *i == '-')
@@ -89,10 +94,9 @@ void setModeOnChannel(std::vector<std::string> word, Client &client, Server &ser
     int index = 2;
     for(std::map<char, bool>::iterator i = option.begin(); i != option.end(); i++)
     {
-        executedParameters++;
         if ((i->first == 'k' || i->first == 'o' || i->first == 'l' ) && (nbParameters <= executedParameters))
-        {
-            server.sendMessage("403 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
+        {            std::cout << "nbparametre: " << nbParameters << " executedParameters" << executedParameters  << "i->first: " << i->first << "second: " << i->second << std::endl;
+            server.sendMessage("403 3" + client.getNickname() + " MODE :Not enough parameters\r\n", client);
         }
         else if (i->first == 'i')
         {
@@ -118,9 +122,10 @@ void setModeOnChannel(std::vector<std::string> word, Client &client, Server &ser
                     channel.setK(true);
                 }
                 else
-                {
+                { std::cout << "word[index] " << word[index] << std::endl;
                     server.sendMessage("476 " + client.getNickname() + " " + channel.getName() + " MODE :Not enough parameters\r\n" ,client);
                     index++;
+                    executedParameters++;
                     continue;
                 }
             }
@@ -161,9 +166,10 @@ void setModeOnChannel(std::vector<std::string> word, Client &client, Server &ser
                 }
             }
             else
-                server.sendMessage("403 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
+                server.sendMessage("403 4" + client.getNickname() + " MODE :Not enough parameters\r\n", client);
         }
         index++;
+        executedParameters++;
     }
 
 }
@@ -192,8 +198,6 @@ bool checkNum(std::string tmp)
 
 bool prohibidedCharacterModePassword(std::string word)
 {
-    if (word[0] != ':')
-            return true;
     for (std::string::iterator i = word.begin(); i != word.end(); i++)
     {
         if (*i == ',' || *i == '\n' || *i == '\r')
@@ -206,6 +210,7 @@ bool prohibidedCharacterMode(std::string tmp, bool checkFirst)
 {
     if (checkFirst && tmp[0] != '#')
         return true;
+    tmp.erase(0, 1);
     for (std::string::iterator i = tmp.begin(); i != tmp.end(); i++)
     {
         if (*i != 't' && *i != 'o' && *i != 'l' && *i != 'k' && *i != 'i' && *i != '+' && *i != '-')
