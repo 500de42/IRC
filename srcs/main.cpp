@@ -3,8 +3,6 @@
 
 int	main(int ac, char **av)
 {
-	struct pollfd server_poll;
-	size_t	len;
 	ssize_t	bytes;
 	char	buff[512];
 
@@ -40,7 +38,9 @@ int	main(int ac, char **av)
                 std::cout << "\n\ntest553\n\n";
 				if (client->getSocket() > 0)
 				{
+					struct pollfd server_poll;
 					std::cout << "\n\ntest3\n\n";
+					memset(&server_poll, 0, sizeof(pollfd));
 					server_poll.fd = client->getSocket();
 					server_poll.events = POLLIN;
 					client->setServsocket(server.getFds()[0].fd);
@@ -71,7 +71,7 @@ int	main(int ac, char **av)
 					if (bytes > 0)
 					{		
 						tmp.getRealBuffer().append(buff, bytes);
-						processCommand(tmp, server, bytes, &i);
+						processCommand(tmp, server, &i);
 					}
 					else if (bytes == 0) //client deco
 					{

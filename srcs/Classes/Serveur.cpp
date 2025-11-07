@@ -35,6 +35,7 @@ int Server::createServer()
         return 1;
     }
     struct pollfd server_poll;
+    memset(&server_poll, 0, sizeof(pollfd));
     server_poll.fd = srv;
     server_poll.events = POLLIN;
     this->fds.push_back(server_poll);

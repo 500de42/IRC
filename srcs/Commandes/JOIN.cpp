@@ -8,7 +8,6 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
     std::stringstream ss(tmp);
     std::vector<std::string> word;
     std::string w;
-    bool setPass = true;
 
     std::cout << "JOIN 1" << std::endl;
     while (ss >> w)
@@ -24,7 +23,7 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
         // gerer tout les channel a quitter //
     }
     std::cout << "JOIN 2.5" << std::endl;
-    std::vector<std::string> channelCommand = splitCommand(word[0], ',');
+    std::vector<std::string> channelName = splitCommand(word[0], ',');
     std::cout << "JOIN 2.6" << std::endl;
     std::vector<std::string> passwordCommand;
     std::cout << "JOIN 3" << std::endl;
@@ -33,35 +32,35 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
         std::cout << "JOIN 3.5" << std::endl;
         passwordCommand = splitCommand(word[1], ',');
         std::cout << "JOIN 4" << std::endl;
-        if (passwordCommand.size() > channelCommand.size())
+        if (passwordCommand.size() > channelName.size())
         {
             server.sendMessage("461 " + client.getNickname() + " JOIN :Invalid channel/key list\r\n", client);
             return ;
         }
     }
     std::cout << "JOIN 5" << std::endl;
-    for (size_t i = 0; i < channelCommand.size(); i++)
+    for (size_t i = 0; i < channelName.size(); i++)
     {  
         std::cout << "JOIN 5.2" << std::endl;
-        if(prohibidedCharacterJoin(channelCommand[i], true))
+        if(prohibidedCharacterJoin(channelName[i], true))
         {
-            std::cout << "caractere interdit, channel entree " << channelCommand.size() << std::endl;
+            std::cout << "caractere interdit, channel entree " << channelName.size() << std::endl;
             std::cout << "JOIN 5.3" << std::endl;
-            server.sendMessage("476 |" + client.getNickname() + "| " + word[0] + " :Bad Channel Mask\r\n", client);
+            server.sendMessage("479 |" + client.getNickname() + "| " + word[0] + " :Bad Channel Mask\r\n", client);
         }
         else
         {std::cout << "JOIN 5.4" << std::endl;
-            channelCommand[i].erase(0, 1);
+            channelName[i].erase(0, 1);
         std::cout << "JOIN 5.5" << std::endl;
-            if (server.getChannels().empty() || !searchChannelMatch(server, channelCommand[i]))
+            if (server.getChannels().empty() || !searchChannelMatch(server, channelName[i]))
             {
                 std::cout << "JOIN 6" << std::endl;
                 Server::Channel *channel = new(Server::Channel);
                 channel->getMembers().push_back(&client);
                 channel->setOperator(client);
-                channel->setName(channelCommand[i]);
+                channel->setName(channelName[i]);
                 client.getChannels().push_back(channel);
-                client.getOpMap()[channelCommand[i]] = true;
+                client.getOpMap()[channelName[i]] = true;
                 server.getChannels().push_back(channel);
             }
             else
@@ -69,7 +68,7 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
                 std::cout << "JOIN 7" << std::endl;
                 try
                 {
-                    Server::Channel &channel = ChannelMatch(server, channelCommand[i]);
+                    Server::Channel &channel = ChannelMatch(server, channelName[i]);
                     std::cout << "JOIN 7.2" << std::endl;
                     if (channel.getK())
                     {std::cout << "JOIN 7.3" << std::endl;
@@ -84,7 +83,11 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
                             channel.getMembers().push_back(&client);
                         }
                         else
-                            server.sendMessage("475 " + client.getNickname() + " " + passwordCommand[i] + " :Cannot join channel (+k)\r\n", client);
+                            {
+                                std::cout << "JOIN 7.65" << std::endl;
+                                
+                                server.sendMessage("475 " + client.getNickname() + " " + channelName[i] + " :Cannot join channel (+k)\r\n", client);
+                            }
                     }
                     else if (channel.getL() && channel.getMembers().size() + 1 > channel.getMembersLimit())
                     {std::cout << "JOIN 7.7" << std::endl;
@@ -118,7 +121,7 @@ void JOIN(Client &client, Server &server, const char *tmp)
     }
     extractAndSetJoin(client, server, buffer);// envoyer a l espace apres join //
     if (server.getChannels().size())
-        for (int i = 0; i < server.getChannels().size(); i++)
+        for (size_t i = 0; i < server.getChannels().size(); i++)
         {
             std::cout << "Name channel : " << server.getChannels()[i]->getName() << std::endl;
         }

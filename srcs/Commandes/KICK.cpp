@@ -77,7 +77,7 @@ void    KICK(Server &server, Client &client, const char *tmp)
                         server.sendMessage("482 " + client.getNickname() + " KICK :The target is channel operator, you can't remove it\r\n", client);
                         continue;
                     }
-                    execKick(channel, words, target, server);
+                    execKick(channel, target);
                 }
                 catch(const std::exception& e)
                 {
@@ -93,7 +93,7 @@ void    KICK(Server &server, Client &client, const char *tmp)
     }
 }
 
-void execKick(Server::Channel &channel, std::vector<std::string> words, Client &target, Server server)
+void execKick(Server::Channel &channel, Client &target)
 {
     removeChannelMember(channel, target);
     channel.setOffOperator(target);

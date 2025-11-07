@@ -1,7 +1,7 @@
 #include "../../includes/Serveur.hpp"
 #include "../../includes/Client.hpp"
 
-void processCommand(Client &client, Server &server, int bytes, size_t *i)
+void processCommand(Client &client, Server &server, size_t *i)
 {
     std::string &line = client.getRealBuffer();
     std::string extract;
@@ -11,49 +11,49 @@ void processCommand(Client &client, Server &server, int bytes, size_t *i)
     {
         pos = line.find("\r\n");
         extract = line.substr(0, pos);
-        execCommand((char *)extract.c_str(), client, server, i);
-        line.erase(0, pos + 2);
+        if (execCommand((char *)extract.c_str(), client, server, i))
+            line.erase(0, pos + 2);
     }
 }
 
-void execCommand(char *buff , Client &tmp, Server &server, size_t *i)
-{
+bool execCommand(char *buff , Client &tmp, Server &server, size_t *i)
+{(void)i;
     std::cout << "\n\ntest8\n\n";
     std::cout << "buffer: "<< buff << "\n\ntest9\n\n";
-    if (!tmp.getGivenPassword())
-    {
-        std::cout << "\n\ntest 10 BUFFER: " << buff << "\n\n";
-        std::string str(buff);
-        if (!strncmp(buff, "PASS ", 5))
-        {
-            std::cout << "\n\ntest extract pass: " << extractPass(str) << " PASS DU SERVER : " << server.getPass() << "\n\n";
-            if (extractPass(str) == server.getPass())
-                tmp.onPass();
-            else
-            {
-                std::cout << "\n\ntest 11 \n\n";
-                server.sendMessage("464 * :Password incorrect\r\n", tmp);
-                close(tmp.getSocket());
-                server.getClients().erase(server.getClients().begin() + ((*i) - 1));
-                server.getFds().erase(server.getFds().begin() + (*i));
-                delete &tmp;
-                (*i)--;
-                return;
-            }
-        }
-        else 
-        {
-            server.sendMessage("464 * :Password incorrect\r\n", tmp);
-            close(tmp.getSocket());
-            server.getClients().erase(server.getClients().begin() + *i);
-            server.getFds().erase(server.getFds().begin() + (*i - 1));
-            delete &tmp;
-            i--;
-            std::cout << "Rejet de connexion. FD: " << tmp.getSocket() << " Première commande invalide: " << buff << "\n";
-            return;
-        }
-    }
-    else if (!tmp.getRegister())
+    // if (!tmp.getGivenPassword())
+    // {
+    //     std::cout << "\n\ntest 10 BUFFER: " << buff << "\n\n";
+    //     std::string str(buff);
+    //     if (!strncmp(buff, "PASS ", 5))
+    //     {
+    //         std::cout << "\n\ntest extract pass: " << extractPass(str) << " PASS DU SERVER : " << server.getPass() << "\n\n";
+    //         if (extractPass(str) == server.getPass())
+    //             tmp.onPass();
+    //         else
+    //         {
+    //             std::cout << "\n\ntest 11 \n\n";
+    //             server.sendMessage("464 * :Password incorrect\r\n", tmp);
+    //             close(tmp.getSocket());
+    //             server.getClients().erase(server.getClients().begin() + ((*i) - 1));
+    //             server.getFds().erase(server.getFds().begin() + (*i));
+    //             delete &tmp;
+    //             (*i)--;
+    //             return false;
+    //         }
+    //     }
+    //     else 
+    //     {
+    //         server.sendMessage("464 * :Password incorrect\r\n", tmp);
+    //         close(tmp.getSocket());
+    //         server.getClients().erase(server.getClients().begin() + ((*i) - 1));
+    //         server.getFds().erase(server.getFds().begin() + (*i));
+    //         std::cout << "Rejet de connexion. FD: " << tmp.getSocket() << " Première commande invalide: " << buff << "\n";
+    //         delete &tmp;
+    //         i--;
+    //         return false;
+    //     }
+    // }
+    if (!tmp.getRegister())
     {
         std::cout << "usernick entree\n";
         if (!strncmp(buff, "USER ", 5) || !strncmp(buff, "NICK ", 5))
@@ -61,10 +61,25 @@ void execCommand(char *buff , Client &tmp, Server &server, size_t *i)
             setUserAndNick(tmp, server, buff);
             std::cout << "setusernick fini11\n";
         }
+        else if (!strncmp(buff, "PASS ", 5) && !tmp.getGivenPassword())
+        {
+            std::string str(buff);
+            if (extractPass(str) == server.getPass())
+                tmp.onPass();
+            else
+                server.sendMessage("464 * :Password incorrect\r\n", tmp);
+        }
         else
         {
             std::cout << "Not registered client : " << buff  << "\n";
             server.sendMessage("451 " + (std::string)buff + " :You may not registered\r\n", tmp);
+            return true;
+        }
+        if (!tmp.getNickname().empty() && !tmp.getUsername().empty() && tmp.getGivenPassword())
+        {
+            std::cout << "Nouvelle connexion acceptée. FD: "  << tmp.getSocket() << std::endl;
+            tmp.onRegisted();
+            server.sendMessage("001 " + tmp.getNickname() +  " :Welcome to the Internet Relay Network " + tmp.getNickname() + "!" + tmp.getUsername() + "@127.0.0.1", tmp);
         }
         std::cout << "setusernick fini\n";
     }
@@ -91,6 +106,7 @@ void execCommand(char *buff , Client &tmp, Server &server, size_t *i)
         {
         }
     }
+    return true;
 }
 
 
@@ -170,7 +186,7 @@ bool prohibidedCharacterJoin(std::string tmp, bool checkFirst)
         return true;
     for (std::string::iterator i = tmp.begin(); i != tmp.end(); i++)
     {
-        if (*i == ' ' || *i == ',' || *i == '*')
+        if (*i == ' ' || *i == ',' || *i == ':')
             return true;
     }
     return false;
@@ -259,7 +275,26 @@ void sendMessageAllClientKick(Server &server, Server::Channel &channel, std::vec
         server.sendMessage(words[1] + ": KICK: #" + words[0] + " " + words[2] + "\r\n", *channel.getMembers()[i]);
     }
 }
-
+    // for(size_t i = 0; i < channel.getMembers().size(); i++)
+    // {
+    //     server.sendMessage(":" + client.getNickname() + "!" + client.getUsername() +"@127.0.0.1 JOIN #" + channel.getName(), *channel.getMembers()[i]);
+    // }
+    // if (channel.getT())
+    //     server.sendMessage(": 332 " + client.getNickname() + " " + channel.getName() + ":" + channel.getTopic(), client);
+    // server.sendMessage(": 353 " + client.getNickname() + " = " + channel.getName() + ":", client);   
+    // for(size_t i = 0; i < channel.getMembers().size(); i++)
+    // {
+    //     server.sendMessage(": 353 " + client.getNickname() + " = " + channel.getName() + ":" + channel.getTopic(), client);
+    // }
+void welcomeMessage(Server &server, Server::Channel &channel, Client  &client)
+{   
+    server.sendMessage(":IRCserver 001 " + client.getNickname() + " :Welcome to the Internet Relay Network " + client.getNickname() + "!" + client.getUsername() +"@127.0.0.1\r\n", client);
+    server.sendMessage(":IRCserver 002 " + client.getNickname() + " :Your host is " + channel.getName() + ", running version 1.0\r\n", client);
+    server.sendMessage(":IRCserver 003 " + client.getNickname() + " :This server was created<date a init>\r\n", client);
+    server.sendMessage(":IRCserver 004 " + client.getNickname() + " :" +client.getNickname() + " IRCserver 1.0 o itklo" +  "\r\n", client);
+    // server.sendMessage(":IRCserver 321 " + client.getNickname() + " :Channel :Users Topic\r\n",client);
+    // server.sendMessage(":IRCserver 323 " + client.getNickname() + " :End of /LIST\r\n",client);
+}
 
 std::vector<std::string> removeCharacter(std::vector<std::string> vec, char c)
 {
@@ -269,7 +304,7 @@ std::vector<std::string> removeCharacter(std::vector<std::string> vec, char c)
     std::cout << vec[0] << " " << vec[1] << " " << vec[2] << std::endl;
     for (std::vector<std::string>::iterator it = vec.begin(); it != vec.end(); it++)
     {    
-        for (int i = 0; i < (*it).size(); i++)
+        for (size_t i = 0; i < (*it).size(); i++)
         {
             if ((*it)[i] == c)
             {

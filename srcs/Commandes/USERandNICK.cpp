@@ -48,17 +48,6 @@ void setUserAndNick(Client &client, Server &server, char *buff)
             return;
         }
     }
-    if (!client.getNickname().empty() && !client.getUsername().empty())
-    {
-        std::cout << "Nouvelle connexion acceptée. FD: "  << client.getSocket() << std::endl;
-        client.onRegisted();
-        server.sendMessage("001 " + client.getNickname() +  " :Welcome to the Internet Relay Network " + client.getNickname() + "!" + client.getUsername() + "@127.0.0.1", client);
-    }
-    else
-    {
-        // server.sendMessage("\r\n", client);
-        std::cout << "buu\n";
-    }
     std::cout << "setusernick fini0\n";
 }
 
@@ -91,7 +80,7 @@ bool extractAndSetMessageForUser(char *tmp, Client &client, Server &server)
         l = joinVector(vec, ' ');
         tab[4] = l;
     }
-    if (prohibidedCharacter(tab[1]) || tab[4].size() && prohibidedCharacter(tab[4]))
+    if (prohibidedCharacter(tab[1]) || (tab.size() > 4 && (tab[4].size() && prohibidedCharacter(tab[4]))))
     {
         std::cout << "test u2 tab 1: " << prohibidedCharacter(tab[1]) << "tab2 : " << prohibidedCharacter(tab[4]) << std::endl;
         server.sendMessage("461 22" + tab[1] + ":Not enough parameters\r\n", client);   
@@ -99,10 +88,12 @@ bool extractAndSetMessageForUser(char *tmp, Client &client, Server &server)
     }
     if (client.getUsername().empty())
     {
-        std::cout << " USERNAME : " << tab[1] << " " << tab[4] << std::endl;
+        if (tab.size() > 4)
+            std::cout << " USERNAME : " << tab[1] << " " << tab[4] << std::endl;
         std::cout << "USER set" << std::endl;
         client.setUsername(tab[1].c_str());
-        client.setRealname(tab[4].c_str());
+        if (tab.size() > 4)
+            client.setRealname(tab[4].c_str());
     }
     else
     {

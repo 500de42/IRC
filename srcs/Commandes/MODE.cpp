@@ -61,9 +61,9 @@ void extractAndSetMode(Client &client, Server &server, std::string tmp)
 void setModeOnChannel(std::vector<std::string> word, Client &client, Server &server, Server::Channel &channel)
 {
     std::map<char, bool> option;
-    int nbParameters = word.size() - 1;
+    int nbParameters = word.size() - 2;
     int executedParameters = 0;
-    std::cout << "nbparametre1: " << nbParameters << " executedParameters1 " << executedParameters  << "word: " << word[0] << " " << word[1] << " size: "<< word.size() << std::endl;
+    std::cout << "nbparametre. " << nbParameters << " executedParameters. " << executedParameters  << "word: " << word[0] << " " << word[1] << " size: "<< word.size() << std::endl;
 
     if (prohibidedCharacterMode(word[1], false))
     {
