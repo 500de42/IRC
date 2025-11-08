@@ -20,39 +20,7 @@ bool execCommand(char *buff , Client &tmp, Server &server, size_t *i)
 {(void)i;
     std::cout << "\n\ntest8\n\n";
     std::cout << "buffer: "<< buff << "\n\ntest9\n\n";
-    // if (!tmp.getGivenPassword())
-    // {
-    //     std::cout << "\n\ntest 10 BUFFER: " << buff << "\n\n";
-    //     std::string str(buff);
-    //     if (!strncmp(buff, "PASS ", 5))
-    //     {
-    //         std::cout << "\n\ntest extract pass: " << extractPass(str) << " PASS DU SERVER : " << server.getPass() << "\n\n";
-    //         if (extractPass(str) == server.getPass())
-    //             tmp.onPass();
-    //         else
-    //         {
-    //             std::cout << "\n\ntest 11 \n\n";
-    //             server.sendMessage("464 * :Password incorrect\r\n", tmp);
-    //             close(tmp.getSocket());
-    //             server.getClients().erase(server.getClients().begin() + ((*i) - 1));
-    //             server.getFds().erase(server.getFds().begin() + (*i));
-    //             delete &tmp;
-    //             (*i)--;
-    //             return false;
-    //         }
-    //     }
-    //     else 
-    //     {
-    //         server.sendMessage("464 * :Password incorrect\r\n", tmp);
-    //         close(tmp.getSocket());
-    //         server.getClients().erase(server.getClients().begin() + ((*i) - 1));
-    //         server.getFds().erase(server.getFds().begin() + (*i));
-    //         std::cout << "Rejet de connexion. FD: " << tmp.getSocket() << " Première commande invalide: " << buff << "\n";
-    //         delete &tmp;
-    //         i--;
-    //         return false;
-    //     }
-    // }
+
     if (!tmp.getRegister())
     {
         std::cout << "usernick entree\n";
@@ -259,8 +227,11 @@ void removeChannelMember(Server::Channel &channel, Client &client)
             channel.getMembers().erase(channel.getMembers().begin() + i);
             for(size_t it = 0; it < client.getChannels().size(); it++)
             {
-                if (client.getChannels()[i]->getName() == channel.getName())
-                    client.getChannels().erase(client.getChannels().begin() + it);
+                if(client.getChannels().size())
+                {    if (client.getChannels()[i]->getName() == channel.getName())
+                        client.getChannels().erase(client.getChannels().begin() + it);}
+                else
+                    std::cout << "channel client vide \n";
             }
             return ;
         }
@@ -275,17 +246,7 @@ void sendMessageAllClientKick(Server &server, Server::Channel &channel, std::vec
         server.sendMessage(words[1] + ": KICK: #" + words[0] + " " + words[2] + "\r\n", *channel.getMembers()[i]);
     }
 }
-    // for(size_t i = 0; i < channel.getMembers().size(); i++)
-    // {
-    //     server.sendMessage(":" + client.getNickname() + "!" + client.getUsername() +"@127.0.0.1 JOIN #" + channel.getName(), *channel.getMembers()[i]);
-    // }
-    // if (channel.getT())
-    //     server.sendMessage(": 332 " + client.getNickname() + " " + channel.getName() + ":" + channel.getTopic(), client);
-    // server.sendMessage(": 353 " + client.getNickname() + " = " + channel.getName() + ":", client);   
-    // for(size_t i = 0; i < channel.getMembers().size(); i++)
-    // {
-    //     server.sendMessage(": 353 " + client.getNickname() + " = " + channel.getName() + ":" + channel.getTopic(), client);
-    // }
+
 void welcomeMessage(Server &server, Server::Channel &channel, Client  &client)
 {   
     server.sendMessage(":IRCserver 001 " + client.getNickname() + " :Welcome to the Internet Relay Network " + client.getNickname() + "!" + client.getUsername() +"@127.0.0.1\r\n", client);
@@ -318,3 +279,17 @@ std::vector<std::string> removeCharacter(std::vector<std::string> vec, char c)
         return vec;
     return word;
 }
+
+    // for(size_t i = 0; i < channel.getMembers().size(); i++)
+    // {
+    //     server.sendMessage(":" + client.getNickname() + "!" + client.getUsername() +"@127.0.0.1 JOIN #" + channel.getName(), *channel.getMembers()[i]);
+    // }
+    // if (channel.getT())
+    //     server.sendMessage(": 332 " + client.getNickname() + " " + channel.getName() + ":" + channel.getTopic(), client);
+    // server.sendMessage(": 353 " + client.getNickname() + " = " + channel.getName() + ":", client);   
+    // for(size_t i = 0; i < channel.getMembers().size(); i++)
+    // {
+    //     server.sendMessage(": 353 " + client.getNickname() + " = " + channel.getName() + ":" + channel.getTopic(), client);
+    // }
+
+

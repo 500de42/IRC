@@ -21,7 +21,6 @@ class Client
 	std::string ipAddress;
 	int cliSocket;
 	int servSocket;
-	std::map<std::string, bool> channelOp;
 	std::string nickname;
 	std::string username;
 	std::string realname;
@@ -30,6 +29,8 @@ class Client
 	bool goodPass;
 	bool isRegistred;
 	std::vector<Server::Channel *> channels;
+	std::vector<std::string> invite;
+	std::map<std::string, bool> channelOp;
 
   public:
 	//      GET     //
@@ -48,6 +49,7 @@ class Client
 	std::string &getRealname();
 	std::vector<Server::Channel *> &getChannels();
 	std::map<std::string, bool> &getOpMap();
+	bool hasBeenInvited(std::string name);
 
 	//      SET     //
 

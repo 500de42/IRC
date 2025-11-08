@@ -7,7 +7,7 @@ void setModeOnChannel(std::vector<std::string> word, Client &client, Server &ser
 bool matchChannelMember(std::string name, Server::Channel channel);
 bool checkNum(std::string tmp);
 bool prohibidedCharacterModePassword(std::string word);
-bool prohibidedCharacterMode(std::string tmp, bool checkFirst);
+bool prohibidedCharacterMode(std::string tmp);
 bool checkOptions(char c);
 
 void MODE(Server &server, Client &client, const char *tmp)
@@ -16,7 +16,7 @@ void MODE(Server &server, Client &client, const char *tmp)
 
     if (buffer.size() < 2)
     {
-        server.sendMessage("461 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
+        server.sendMessage("461 1" + client.getNickname() + " MODE :Not enough parameters\r\n", client);
         return ;
     }
     extractAndSetMode(client, server, buffer);
@@ -31,22 +31,24 @@ void extractAndSetMode(Client &client, Server &server, std::string tmp)
     while (ss >> w)
         word.push_back(w);
     word.erase(word.begin());
-    // if (word.size() < 1 || word.empty())
-    // {
-    //     server.sendMessage("461 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
-    //     return ;
-    // }
-    if (word[0][0] != '#')
+
+    if (word.empty() || word.size() < 2 || word[0].empty() || word[0].size() < 2 || word[0][0] != '#')
     {
-        server.sendMessage("461 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
+        server.sendMessage("461 2" + client.getNickname() + " MODE :Not enough parameters\r\n", client);
         return;
     }
+
     word[0].erase(0, 1);
     try{
         Server::Channel &channel = ChannelMatch(server, word[0]);
         if (client.getOp(channel.getName()) == false)
         {
             server.sendMessage("482 " + client.getNickname() + " #" + channel.getName() + " MODE :You're not channel operator\r\n", client);
+            return;
+        }
+        if (matchChannelMember(client.getNickname(), channel))
+        {
+            server.sendMessage("442 " + client.getNickname() + " #" + channel.getName() + " MODE ::You're not on that channel\r\n", client);
             return;
         }
         setModeOnChannel(word, client, server, channel);
@@ -61,40 +63,32 @@ void extractAndSetMode(Client &client, Server &server, std::string tmp)
 void setModeOnChannel(std::vector<std::string> word, Client &client, Server &server, Server::Channel &channel)
 {
     std::map<char, bool> option;
-    int nbParameters = word.size() - 2;
+    int nbParameters = word.size() - 1;
     int executedParameters = 0;
     std::cout << "nbparametre. " << nbParameters << " executedParameters. " << executedParameters  << "word: " << word[0] << " " << word[1] << " size: "<< word.size() << std::endl;
 
-    if (prohibidedCharacterMode(word[1], false))
+    if (prohibidedCharacterMode(word[1]) || word[1].size() < 2)
     {
-        server.sendMessage("461 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
+        std::cout << "test caractere interdit :" << prohibidedCharacterMode(word[1]) << "  size:" << word[1].size() << "word[1]: " << word[1] << std::endl;
+        server.sendMessage("461 3" + client.getNickname() + " MODE :Not enough parameters\r\n", client);
         return;   
     }
-    if (*word[1].begin() != '+' && *word[1].begin() != '-')//message a bien set
+    for (std::string::iterator i = word[1].begin() + 1; i != word[1].end(); i++)
     {
-        std::cout << "word : " << *word[1].begin() << " " << word[1] << std::endl;
-        server.sendMessage("403 2" + client.getNickname() + " MODE :Not enough parameters\r\n", client);
-    }
-    for (std::string::iterator i = word[1].begin(); i != word[1].end(); i++)
-    {
-        if (*i == '+' || *i == '-')
+        if (checkOptions(*i))
         {
-            if ((i + 1) != word[1].end() && checkOptions(*(i + 1)))
-            {
-                char next = *(i + 1);
-                if (*i == '+')
-                    option[next] = true;
-                else
-                    option[next] = false;
-            }
+            if (*word[1].begin() == '+')
+                option[*i] = true;
             else
-                server.sendMessage("461 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
+                option[*i] = false;
         }
+        else
+            server.sendMessage("461 4" + client.getNickname() + " MODE :Not enough parameters\r\n", client);
     }
     int index = 2;
     for(std::map<char, bool>::iterator i = option.begin(); i != option.end(); i++)
     {
-        if ((i->first == 'k' || i->first == 'o' || i->first == 'l' ) && (nbParameters <= executedParameters))
+        if ((i->first == 'k' || i->first == 'o' || i->first == 'l' ) && i->second == true && (nbParameters <= executedParameters || word.size() < 3))
         {            std::cout << "nbparametre: " << nbParameters << " executedParameters" << executedParameters  << "i->first: " << i->first << "second: " << i->second << std::endl;
             server.sendMessage("403 3" + client.getNickname() + " MODE :Not enough parameters\r\n", client);
         }
@@ -122,7 +116,8 @@ void setModeOnChannel(std::vector<std::string> word, Client &client, Server &ser
                     channel.setK(true);
                 }
                 else
-                { std::cout << "word[index] " << word[index] << std::endl;
+                { 
+                    std::cout << "word[index] " << word[index] << std::endl;
                     server.sendMessage("476 " + client.getNickname() + " " + channel.getName() + " MODE :Not enough parameters\r\n" ,client);
                     index++;
                     executedParameters++;
@@ -140,28 +135,26 @@ void setModeOnChannel(std::vector<std::string> word, Client &client, Server &ser
             if (matchChannelMember(word[index], channel))
             {
                 if (i->second == true)
-                {
                     channel.setOperator(client);
-                    // channel.setO(true);
-                }
                 else
-                {}//cree une fonction qui enleve les client op
+                    channel.setOffOperator(client);
             }
             else
-                server.sendMessage("441 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
+                server.sendMessage("441 " + client.getNickname() + " MODE :The client aren't in that channel\r\n", client);
         }
         else if (i->first == 'l')
         {
-            if (checkNum(word[index]))
+            if (checkNum(word[index]) || atol((word[index].c_str())) < 4294967295)
             {
                 if (i->second == true)
                 {
-                    channel.setI(true);
-                    channel.setMembersLimit(atoi(word[index].c_str()));
+                    std::cout << "limite rentrer: " << atol(word[index].c_str()) << std::endl;
+                    channel.setL(true);
+                    channel.setMembersLimit(atol(word[index].c_str()));
                 }
                 else
                 {
-                    channel.setI(false);
+                    channel.setL(false);
                     channel.setMembersLimit(0);
                 }
             }
@@ -191,7 +184,8 @@ bool checkNum(std::string tmp)
         if (!isdigit(*i))
             return false;
     }
-    if (atol(tmp.c_str()) < 0)
+    size_t limit = atol(tmp.c_str());
+    if (limit < 1)
         return false;
     return true;
 }
@@ -206,16 +200,20 @@ bool prohibidedCharacterModePassword(std::string word)
     return false;
 }
 
-bool prohibidedCharacterMode(std::string tmp, bool checkFirst)
+bool prohibidedCharacterMode(std::string tmp)
 {
-    if (checkFirst && tmp[0] != '#')
+    int check = 0;
+    if (tmp[0] != '+' && tmp[0] != '-')
         return true;
-    tmp.erase(0, 1);
     for (std::string::iterator i = tmp.begin(); i != tmp.end(); i++)
     {
+        if (*i == '+' || *i == '-')
+            check++;
         if (*i != 't' && *i != 'o' && *i != 'l' && *i != 'k' && *i != 'i' && *i != '+' && *i != '-')
             return true;
     }
+    if (check != 1)
+        return true;
     return false;
 }
 

@@ -21,11 +21,22 @@ void    KICK(Server &server, Client &client, const char *tmp)
     {
         while (ss >> w)
             words.push_back(w); // join les messages apres le ':'
+        if (words.size() < 3)
+        {
+            server.sendMessage("461 " + client.getNickname() + " KICK :Not enough parameters\r\n", client);
+            return;
+        }
         words.erase(words.begin());
         if (words[0][0] == '#')
-            words[0].erase(0);
+            words[0].erase(0, 1);
         else
         {  
+            server.sendMessage("461 " + client.getNickname() + " KICK :Not enough parameters\r\n", client);
+            return;
+        }
+        targetsList = splitCommand(words[1], ',');
+        if (targetsList.empty())
+        {
             server.sendMessage("461 " + client.getNickname() + " KICK :Not enough parameters\r\n", client);
             return;
         }
@@ -57,9 +68,6 @@ void    KICK(Server &server, Client &client, const char *tmp)
                 server.sendMessage("482 " + client.getNickname() + " KICK :You not channel operator\r\n", client);
                 return;
             }
-            targetsList[0] = words[1];
-            if (words[1].find(','))
-                targetsList = splitCommand(words[1], ',');
             
             for(std::vector<std::string>::iterator it = targetsList.begin(); it != targetsList.end(); it++)
             {
@@ -88,6 +96,7 @@ void    KICK(Server &server, Client &client, const char *tmp)
         }
         catch(const std::exception& e)
         {
+            std::cout << "WORD[0] KICK: " << words[0] << " WORD[1]" << words[1]  << "2 " << words[2]  << "nb de channel sur le serveur: " << server.getChannels().size() << std::endl;   
             server.sendMessage("403 " + client.getNickname() + " KICK :Channel don't exist\r\n", client);
         } 
     }

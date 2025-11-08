@@ -40,6 +40,7 @@ class Server
 			bool &getI();
 			bool &getT();
 			bool &getL();
+			bool &getO();
 			size_t getMembersLimit();
 			std::string &getTopic();
 			std::string &getName();
@@ -51,6 +52,7 @@ class Server
 			void setT(bool active);
 			void setI(bool active);
 			void setL(bool active);
+			void setO(bool active);
 			void setMembersLimit(size_t limit);
 			void setTopic(const std::string &name);
 			void setName(const std::string &name);
@@ -67,7 +69,7 @@ class Server
 		void 	closeAllSockets();
 		bool 	checkDoubleName(const char *name);
 		void 	sendMessage(std::string buffer, Client client);
-
+		void	addClientInChannel(Server::Channel &channel, Client  &client);
 		//		GET			//
 
 		struct sockaddr_in 		&getSockaddr();
@@ -99,22 +101,23 @@ class Server
 /////////////////////				UTILS					////////////////////
 
 
-Server::Channel 		&ChannelMatch(Server server, std::string name);
-std::vector<std::string> splitCommand(std::string command, char c);
-std::string extractMessage(char *tmp);
-std::string extractPass(std::string pass);
-std::string joinVector(const std::vector<std::string> &vec, char sep);
-bool		prohibidedCharacter(std::string tmp);
-bool		prohibidedCharacterJoin(std::string tmp, bool checkFirst);
-bool 		searchChannelMatch(Server server, std::string name);
-bool 		prohibidedCharacterModePassword(std::string word);
-bool 		prohibitedCharacterServerPassword(std::string word);
-bool 		checkNum(std::string tmp);
-bool 		searchMembers(std::string name, Server::Channel channel);
-Client 		&clientMatch(std::string name,  Server server);
-void 		removeChannelMember(Server::Channel &channel, Client &client);
-void 		sendMessageAllClientKick(Server &server, Server::Channel &channel, std::vector<std::string> words);
-std::vector<std::string> removeCharacter(std::vector<std::string> vec, char c);
+Server::Channel 			&ChannelMatch(Server server, std::string name);
+std::vector<std::string> 	splitCommand(std::string command, char c);
+std::string 				extractMessage(char *tmp);
+std::string 				extractPass(std::string pass);
+std::string 				joinVector(const std::vector<std::string> &vec, char sep);
+bool						prohibidedCharacter(std::string tmp);
+bool						prohibidedCharacterJoin(std::string tmp, bool checkFirst);
+bool 						searchChannelMatch(Server server, std::string name);
+bool 						prohibidedCharacterModePassword(std::string word);
+bool 						prohibitedCharacterServerPassword(std::string word);
+bool 						checkNum(std::string tmp);
+bool 						searchMembers(std::string name, Server::Channel channel);
+Client 						&clientMatch(std::string name,  Server server);
+void 						removeChannelMember(Server::Channel &channel, Client &client);
+void 						sendMessageAllClientKick(Server &server, Server::Channel &channel, std::vector<std::string> words);
+std::vector<std::string> 	removeCharacter(std::vector<std::string> vec, char c);
+void 						welcomeMessage(Server &server, Server::Channel &channel, Client  &client);
 
 
 /////////////////////				COMMANDES				/////////////////////

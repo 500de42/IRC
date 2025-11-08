@@ -16,8 +16,7 @@ int	main(int ac, char **av)
 		std::cout << "The password contains prohibited characters.\n";
 		return (1);
 	}
-	if (!checkNum((std::string)av[1]) || std::atoi(av[1]) < 1024
-		|| std::atoi(av[1]) > 65535)
+	if (!checkNum((std::string)av[1]) || std::atoi(av[1]) < 1024 || std::atoi(av[1]) > 65535)
 	{
 		std::cout << "The port is not correct\n";
 		return (1);

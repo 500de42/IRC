@@ -42,6 +42,12 @@ int Server::createServer()
     return 0;
 }
 
+void Server::addClientInChannel(Server::Channel &channel, Client  &client)
+{
+    channel.getMembers().push_back(&client);
+    client.getChannels().push_back(&channel);
+    welcomeMessage(*this, channel, client);
+}
 
 std::vector<Client*> &Server::getClients()
 {

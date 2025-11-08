@@ -63,6 +63,11 @@ void Server::Channel::setT(bool active)
     t = active;
 }
 
+void Server::Channel::setO(bool active)
+{
+    o = active;
+}
+
 void Server::Channel::setMembersLimit(size_t limit)
 {
     this->membersLimit = limit;
@@ -86,6 +91,11 @@ bool &Server::Channel::getT()
 bool &Server::Channel::getL()
 {
     return l;
+}
+
+bool &Server::Channel::getO()
+{
+    return o;
 }
 
 size_t Server::Channel::getMembersLimit()
