@@ -100,17 +100,6 @@ bool Client::getRegister()
     return isRegistred;
 }
 
-bool Client::hasBeenInvited(std::string Name)
-{
-    if (invite.empty())
-        for(std::vector<std::string>::iterator it = invite.begin(); it != invite.end(); it++)
-        {
-            if (*it == Name)
-                return true;
-        }
-    return false;
-}
-
 Client &Client::operator=(const Client &cpy)
 {
     if (this != &cpy) 

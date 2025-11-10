@@ -29,12 +29,10 @@ class Client
 	bool goodPass;
 	bool isRegistred;
 	std::vector<Server::Channel *> channels;
-	std::vector<std::string> invite;
 	std::map<std::string, bool> channelOp;
 
   public:
 	//      GET     //
-
 
 	bool getOp(std::string name);
 	bool getGivenPassword();
@@ -49,7 +47,6 @@ class Client
 	std::string &getRealname();
 	std::vector<Server::Channel *> &getChannels();
 	std::map<std::string, bool> &getOpMap();
-	bool hasBeenInvited(std::string name);
 
 	//      SET     //
 

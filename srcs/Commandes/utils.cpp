@@ -47,7 +47,7 @@ bool execCommand(char *buff , Client &tmp, Server &server, size_t *i)
         {
             std::cout << "Nouvelle connexion acceptée. FD: "  << tmp.getSocket() << std::endl;
             tmp.onRegisted();
-            server.sendMessage("001 " + tmp.getNickname() +  " :Welcome to the Internet Relay Network " + tmp.getNickname() + "!" + tmp.getUsername() + "@127.0.0.1", tmp);
+            server.sendMessage("001 " + tmp.getNickname() +  " :Welcome to the Internet Relay Network " + tmp.getNickname() + "!" + tmp.getUsername() + "@127.0.0.1\r\n", tmp);
         }
         std::cout << "setusernick fini\n";
     }
@@ -58,8 +58,7 @@ bool execCommand(char *buff , Client &tmp, Server &server, size_t *i)
         else if (!strncmp(buff, "KICK ", 5))
             KICK(server, tmp, buff);
         else if (!strncmp(buff, "INVITE ", 7))
-        {
-        }
+            INVITE(tmp, server, buff);
         else if (!strncmp(buff, "TOPIC ", 6))
         {
         }
@@ -228,10 +227,18 @@ void removeChannelMember(Server::Channel &channel, Client &client)
             for(size_t it = 0; it < client.getChannels().size(); it++)
             {
                 if(client.getChannels().size())
-                {    if (client.getChannels()[i]->getName() == channel.getName())
-                        client.getChannels().erase(client.getChannels().begin() + it);}
+                {
+                    if (client.getChannels()[it]->getName() == channel.getName())
+                    {    
+                        client.getChannels().erase(client.getChannels().begin() + it);
+                        break;
+                    }
+                }
                 else
+                {    
                     std::cout << "channel client vide \n";
+                    break;
+                }
             }
             return ;
         }
@@ -239,11 +246,16 @@ void removeChannelMember(Server::Channel &channel, Client &client)
     return ;
 }
 
-void sendMessageAllClientKick(Server &server, Server::Channel &channel, std::vector<std::string> words)
+void sendMessageAllClientKick(Server &server, Server::Channel &channel, std::vector<std::string> words, Client client)
 {   
+    std::string tmp(client.getNickname() + "!" + client.getUsername() +"@127.0.0.1 : KICK: #");
+
     for(size_t i = 0; i < channel.getMembers().size(); i++)
     {
-        server.sendMessage(words[1] + ": KICK: #" + words[0] + " " + words[2] + "\r\n", *channel.getMembers()[i]);
+        if(words.size() == 3)
+            server.sendMessage(tmp + words[0] + " " + words[1] + " :" + words[2] + "\r\n", *channel.getMembers()[i]);
+        else if (words.size() == 2)
+            server.sendMessage(tmp + words[0] + " " + words[1] + "\r\n", *channel.getMembers()[i]);
     }
 }
 

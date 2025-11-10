@@ -1,6 +1,5 @@
 #include "../../includes/Serveur.hpp"
 #include "../../includes/Client.hpp"
-#include "../../includes/Channel.hpp"
 
 
 void setUserAndNick(Client &client, Server &server, char *buff)

@@ -21,8 +21,9 @@ class Server
 	class Channel
 	{
 		private:
-			std::vector<Client *> operators;
-			std::vector<Client *> members;
+			std::vector<Client *> 		operators;
+			std::vector<Client *>		members;
+			std::vector<std::string>	invited;
 			std::string topic;
 			std::string name;
 			std::string Password;
@@ -46,6 +47,7 @@ class Server
 			std::string &getName();
 			std::string &getPass();
 			std::vector<Client *> &getMembers();
+			std::vector<std::string> &getInvitedMembers();
 
 			//      SET         //
 			void setK(bool active);
@@ -59,6 +61,9 @@ class Server
 			void setOperator(Client &client);
 			void setOffOperator(Client &client);
 			void setPasssword(const std::string &name);
+			//		OTHERS		//
+			
+			bool hasBeenInvited(std::string name);
 			Channel();
 	};
 
@@ -115,7 +120,7 @@ bool 						checkNum(std::string tmp);
 bool 						searchMembers(std::string name, Server::Channel channel);
 Client 						&clientMatch(std::string name,  Server server);
 void 						removeChannelMember(Server::Channel &channel, Client &client);
-void 						sendMessageAllClientKick(Server &server, Server::Channel &channel, std::vector<std::string> words);
+void 						sendMessageAllClientKick(Server &server, Server::Channel &channel, std::vector<std::string> words, Client client);
 std::vector<std::string> 	removeCharacter(std::vector<std::string> vec, char c);
 void 						welcomeMessage(Server &server, Server::Channel &channel, Client  &client);
 
@@ -131,3 +136,4 @@ bool	execCommand(char *buff , Client &tmp, Server &server, size_t *i);
 void	JOIN(Client &client, Server &server, const char *tmp);
 void    KICK(Server &server, Client &client, const char *tmp);
 void	execKick(Server::Channel &channel, Client &target);
+void 	INVITE(Client &client, Server &server, const char *tmp);

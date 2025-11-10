@@ -118,7 +118,23 @@ std::vector<Client*> &Server::Channel::getMembers()
     return this->members;
 }
 
+std::vector<std::string> &Server::Channel::getInvitedMembers()
+{
+    return this->invited;
+}
+
 std::string &Server::Channel::getPass()
 {
     return this->Password;
+}
+
+bool Server::Channel::hasBeenInvited(std::string Name)
+{
+    if (!invited.empty())
+        for(std::vector<std::string>::iterator it = invited.begin(); it != invited.end(); it++)
+        {
+            if (*it == Name)
+                return true;
+        }
+    return false;
 }

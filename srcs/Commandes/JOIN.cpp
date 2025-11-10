@@ -70,6 +70,7 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
                 client.getOpMap()[channelName[i]] = true;
                 channel->getMembers().push_back(&client);
                 server.getChannels().push_back(channel);
+                welcomeMessage(server, *channel, client);
             }
             else
             {
@@ -78,6 +79,8 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
                 {
                     Server::Channel &channel = ChannelMatch(server, channelName[i]);
 
+                    if (searchMembers(client.getNickname(), channel))
+                        continue;
                     std::cout << "JOIN 7.2" << std::endl;
                     if (channel.getK())
                     {
@@ -89,6 +92,11 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
                             {
                                 std::cout << "JOIN 7.5" << std::endl;
                                 server.sendMessage("475 " + client.getNickname() + " " + tmp + " :Limit reached, you cannot join channel (+l)\r\n", client);
+                                continue;
+                            }
+                            else if (channel.getI() && !channel.hasBeenInvited(client.getNickname()))
+                            {
+                                server.sendMessage("475 " + client.getNickname() + " " + tmp + " :You cannot join channel without invitation (+i)\r\n", client);
                                 continue;
                             }
                             std::cout << "JOIN 7.6" << std::endl;
@@ -113,7 +121,7 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
                     }
                     else if (channel.getI())
                     {
-                        if (client.hasBeenInvited(channel.getName()))
+                        if (channel.hasBeenInvited(client.getNickname()))
                             server.addClientInChannel(channel, client);
                         else
                             server.sendMessage("475 " + client.getNickname() + " " + tmp + " :Cannot join channel (+i)\r\n", client);
