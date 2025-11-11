@@ -13,6 +13,9 @@
 #include <cstdlib>
 #include <map>
 
+time_t startT = time(NULL);
+std::string currentTime = std::to_string(startT);
+
 class Client;
 
 class Server
@@ -27,6 +30,7 @@ class Server
 			std::string topic;
 			std::string name;
 			std::string Password;
+			std::string lastTopicSetter;
 			bool k; // mdp pour le channel
 			bool l; // limit le nb de client
 			bool t; // seul un utilisateur peut changer le topic du channel
@@ -46,6 +50,7 @@ class Server
 			std::string &getTopic();
 			std::string &getName();
 			std::string &getPass();
+			std::string &getLastTopicSetter();
 			std::vector<Client *> &getMembers();
 			std::vector<std::string> &getInvitedMembers();
 
@@ -123,6 +128,7 @@ void 						removeChannelMember(Server::Channel &channel, Client &client);
 void 						sendMessageAllClientKick(Server &server, Server::Channel &channel, std::vector<std::string> words, Client client);
 std::vector<std::string> 	removeCharacter(std::vector<std::string> vec, char c);
 void 						welcomeMessage(Server &server, Server::Channel &channel, Client  &client);
+void 						sendMessageAllClient(Server &server, Server::Channel &channel, std::string message);
 
 
 /////////////////////				COMMANDES				/////////////////////

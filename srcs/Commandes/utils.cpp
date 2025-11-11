@@ -67,7 +67,10 @@ bool execCommand(char *buff , Client &tmp, Server &server, size_t *i)
         else if (!strncmp(buff, "USER ", 5))
             server.sendMessage("462" + (std::string)buff + ":You may not reregister\r\n", tmp);
         else if (!strncmp(buff, "NICK ", 5))
+            server.sendMessage("462" + (std::string)buff + ":You may not reregister\r\n", tmp);
+        else if (!strncmp(buff, "PING ", 5))
         {
+            
         }
         else
         {
@@ -256,6 +259,14 @@ void sendMessageAllClientKick(Server &server, Server::Channel &channel, std::vec
             server.sendMessage(tmp + words[0] + " " + words[1] + " :" + words[2] + "\r\n", *channel.getMembers()[i]);
         else if (words.size() == 2)
             server.sendMessage(tmp + words[0] + " " + words[1] + "\r\n", *channel.getMembers()[i]);
+    }
+}
+
+void sendMessageAllClient(Server &server, Server::Channel &channel, std::string message)
+{
+    for(size_t i = 0; i < channel.getMembers().size(); i++)
+    {
+        server.sendMessage(message + "\r\n", *channel.getMembers()[i]);
     }
 }
 
