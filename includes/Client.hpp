@@ -61,7 +61,9 @@ class Client
 	void setOp(std::string name, bool mode);
 	void setOffOpMap(std::string name);
 	Client(int port);
-	//              //
+	
+	//		OTHER		//
 
+	void quitAllChannels(Server server);
 	Client &operator=(const Client &cpy);
 };

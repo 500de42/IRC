@@ -60,20 +60,16 @@ bool execCommand(char *buff , Client &tmp, Server &server, size_t *i)
         else if (!strncmp(buff, "INVITE ", 7))
             INVITE(tmp, server, buff);
         else if (!strncmp(buff, "TOPIC ", 6))
-        {
-        }
+            TOPIC(server, tmp, buff + 5);
         else if (!strncmp(buff, "MODE ", 5))
             MODE(server, tmp, buff);
         else if (!strncmp(buff, "USER ", 5))
-            server.sendMessage("462" + (std::string)buff + ":You may not reregister\r\n", tmp);
+            server.sendMessage("462" + (std::string)buff + ":Unauthorized command (already registered)\r\n", tmp);
         else if (!strncmp(buff, "NICK ", 5))
-            server.sendMessage("462" + (std::string)buff + ":You may not reregister\r\n", tmp);
-        else if (!strncmp(buff, "PING ", 5))
-        {
-            
-        }
+            NICK(server, tmp, buff);
         else
         {
+            server.sendMessage("421 " + tmp.getNickname() + " " + (std::string)buff + " :Unknown command\r\n", tmp);
         }
     }
     return true;

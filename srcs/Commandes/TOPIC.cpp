@@ -72,6 +72,6 @@ void TOPIC(Server &server, Client &client, const char *tmp)
     }
     catch(std::exception &e)
     {
-        server.sendMessage("401 " + client.getNickname() + " TOPIC :Channel don't exist\r\n", client);
+        server.sendMessage("403 " + client.getNickname() + " TOPIC :Channel("+ channelName +") don't exist\r\n", client);
     }
 }

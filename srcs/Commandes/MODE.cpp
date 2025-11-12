@@ -38,7 +38,8 @@ void extractAndSetMode(Client &client, Server &server, std::string tmp)
     }
 
     word[0].erase(0, 1);
-    try{
+    try
+    {
         Server::Channel &channel = ChannelMatch(server, word[0]);
         if (client.getOp(channel.getName()) == false)
         {
@@ -54,7 +55,7 @@ void extractAndSetMode(Client &client, Server &server, std::string tmp)
     }
     catch(std::exception &e)
     {
-        server.sendMessage("403 1" + client.getNickname() + " MODE :Channel does not exist\r\n", client);
+        server.sendMessage("403 1" + client.getNickname() + " MODE :Channel(" + word[0] + ") does not exist\r\n", client);
         return;
     }
 }
@@ -167,7 +168,7 @@ void setModeOnChannel(std::vector<std::string> word, Client &client, Server &ser
                         parameters.erase(parameters.begin());
             }
             else
-                server.sendMessage("403 4" + client.getNickname() + " MODE :Not enough parameters\r\n", client);
+                server.sendMessage("461 4" + client.getNickname() + " MODE :Not enough parameters\r\n", client);
         }
     }
 }

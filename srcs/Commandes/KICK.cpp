@@ -83,7 +83,7 @@ void    KICK(Server &server, Client &client, const char *tmp)
                 }
                 catch(const std::exception& e)
                 {
-                    server.sendMessage("401 " + client.getNickname() + " KICK :The target don't exist\r\n", client);
+                    server.sendMessage("401 " + client.getNickname() + " KICK :The target(" + *it + ") don't exist\r\n", client);
                 }
             }
             
@@ -91,7 +91,7 @@ void    KICK(Server &server, Client &client, const char *tmp)
         catch(const std::exception& e)
         {
             std::cout << "WORD[0] KICK: " << words[0] << " WORD[1]" << words[1]  << "2 " << words[2]  << "nb de channel sur le serveur: " << server.getChannels().size() << std::endl;   
-            server.sendMessage("403 " + client.getNickname() + " KICK :Channel don't exist\r\n", client);
+            server.sendMessage("403 " + client.getNickname() + " KICK :Channel(" + words[0] + ") don't exist\r\n", client);
         } 
     }
 }

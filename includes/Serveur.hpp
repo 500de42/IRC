@@ -12,9 +12,12 @@
 #include <cerrno>
 #include <cstdlib>
 #include <map>
+#include <sys/signal.h>
+#include <csignal>
 
 time_t startT = time(NULL);
 std::string currentTime = std::to_string(startT);
+int signal;
 
 class Client;
 
@@ -41,18 +44,18 @@ class Server
 		public:
 			//      GET         //
 
-			bool &getK();
-			bool &getI();
-			bool &getT();
-			bool &getL();
-			bool &getO();
-			size_t getMembersLimit();
-			std::string &getTopic();
-			std::string &getName();
-			std::string &getPass();
-			std::string &getLastTopicSetter();
-			std::vector<Client *> &getMembers();
-			std::vector<std::string> &getInvitedMembers();
+			bool 						&getK();
+			bool 						&getI();
+			bool 						&getT();
+			bool 						&getL();
+			bool 						&getO();
+			size_t 						getMembersLimit();
+			std::string 				&getTopic();
+			std::string 				&getName();
+			std::string 				&getPass();
+			std::string 				&getLastTopicSetter();//a set
+			std::vector<Client *> 		&getMembers();
+			std::vector<std::string> 	&getInvitedMembers();
 
 			//      SET         //
 			void setK(bool active);
@@ -95,15 +98,15 @@ class Server
 		void 	setPort(int Port);
 
 	private:
-		struct sockaddr_in serv_addr;
-		int srv;
-		static bool Signal;
-		std::vector<Client *> clients;
-		std::vector<Channel *> channels;
-		std::vector<pollfd> fds;
-		int port;
-		std::string pass;
-		char *buffer;	
+		struct sockaddr_in 		serv_addr;
+		int 					srv;
+		static bool 			Signal;
+		std::vector<Client *> 	clients;
+		std::vector<Channel *> 	channels;
+		std::vector<pollfd> 	fds;
+		int 					port;
+		std::string 			pass;
+		char 					*buffer;	
 };
 
 
@@ -143,3 +146,6 @@ void	JOIN(Client &client, Server &server, const char *tmp);
 void    KICK(Server &server, Client &client, const char *tmp);
 void	execKick(Server::Channel &channel, Client &target);
 void 	INVITE(Client &client, Server &server, const char *tmp);
+void 	TOPIC(Server &server, Client &client, const char *tmp);
+void 	NICK(Server &server, Client &client, const char *tmp);
+

@@ -145,3 +145,15 @@ void Client::onPass()
 {
     this->goodPass = true;
 }
+
+void Client::quitAllChannels(Server server)
+{
+    if (channels.empty())
+        return;
+    std::string host(nickname + "!" + username +"@127.0.0.1 : PART ");
+    for(std::vector<Server::Channel *>::iterator it = channels.begin(); it != channels.end(); it++)
+    {
+        server.sendMessage(host + (*it)->getName() + "\r\n", *this);
+    }    
+    channels.erase(channels.begin(), channels.end());
+}

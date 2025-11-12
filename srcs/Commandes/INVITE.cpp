@@ -65,12 +65,12 @@ void execInvite(Client &client, Server &server, std::string tmp)
         }
         catch(std::exception &e)
         {
-            server.sendMessage("401 " + client.getNickname() + " INVITE :The target don't exist\r\n", client);
+            server.sendMessage("401 " + client.getNickname() + " INVITE :The target(" + words[0] + ") don't exist\r\n", client);
         }
     }
     catch(std::exception &e)
     {
-        server.sendMessage("403 " + client.getNickname() + " INVITE :Channel don't exist\r\n", client);
+        server.sendMessage("403 " + client.getNickname() + " INVITE :Channel(" + words[1] + ") don't exist\r\n", client);
     }
 }
 

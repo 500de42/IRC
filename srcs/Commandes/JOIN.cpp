@@ -25,6 +25,7 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
     std::cout << "JOIN 2" << std::endl;
     if (word.size() == 1 && word[0].size() == 1 && word[0][0] == '0')
     {
+        client.quitAllChannels(server);
         // gerer tout les channel a quitter //
     }
     std::cout << "JOIN 2.5" << std::endl;
@@ -133,8 +134,9 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
                         std::cout << "JOIN 7.9" << std::endl;
                     }
                 }
-                catch(std::exception &e) {
-                    std::cout << "le channel ne s est pas ajouter, nom du channel: " << word[0] << std::endl;
+                catch(std::exception &e) 
+                {
+                    server.sendMessage("403 " + client.getNickname() + " INVITE :Channel(" + channelName[i] + ") don't exist\r\n", client);
                 }
             }
         }
