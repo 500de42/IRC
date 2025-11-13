@@ -13,16 +13,17 @@ void    KICK(Server &server, Client &client, const char *tmp)
 
     if (buff.size() < 3)
     {
-        server.sendMessage("461 " + client.getNickname() + " KICK :Not enough parameters\r\n", client);
+        server.sendMessage("461 0.5" + client.getNickname() + " KICK :Not enough parameters\r\n", client);
         return;
     }
     else
     {
         while (ss >> w)
             words.push_back(w); // join les messages apres le ':'
-        if (words.size() < 3 || words[1][0] == '#' || words[1].size() < 2)
+        if (words.size() < 3 || words[1][0] != '#' || words[1].size() < 2)
         {
-            server.sendMessage("461 " + client.getNickname() + " KICK :Not enough parameters\r\n", client);
+            std::cout << "size: " << words.size() << " caractere diez " << words[1][0] << "sa taile " << words[1].size() << std::endl;
+            server.sendMessage("461 1" + client.getNickname() + " KICK :Not enough parameters\r\n", client);
             return;
         }
         words.erase(words.begin());
@@ -30,13 +31,13 @@ void    KICK(Server &server, Client &client, const char *tmp)
         targetsList = splitCommand(words[1], ',');
         if (targetsList.empty())
         {
-            server.sendMessage("461 " + client.getNickname() + " KICK :Not enough parameters\r\n", client);
+            server.sendMessage("461 2" + client.getNickname() + " KICK :Not enough parameters\r\n", client);
             return;
         }
         if (words.size() >= 3)
         {
             int pos = buff.find(':');
-            if (pos)
+            if (pos != (int)std::string::npos)
             {
                 words[2] = buff.substr(pos);
                 words[2].erase(0, 1);
@@ -83,6 +84,10 @@ void    KICK(Server &server, Client &client, const char *tmp)
                 }
                 catch(const std::exception& e)
                 {
+                    for(size_t i = 0; i < server.getClients().size(); i++)
+                    {
+                        std::cout << server.getClients()[i]->getNickname() << std::endl;
+                    }
                     server.sendMessage("401 " + client.getNickname() + " KICK :The target(" + *it + ") don't exist\r\n", client);
                 }
             }

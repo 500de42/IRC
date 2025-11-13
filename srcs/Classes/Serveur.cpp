@@ -119,3 +119,57 @@ std::string &Server::getPass()
 {
     return pass;
 }
+
+void 	Server::setCurrentTime(std::stringstream &ss)
+{
+    currentTime = ss.str();
+}
+
+std::string &Server::getCurrentTime()
+{
+    return currentTime;
+}
+
+std::string 	&Server::Channel::getLastTopicSetter()
+{
+    return lastTopicSetter;
+}
+
+void Server::Channel::setOfMember(std::string name)
+{
+    for(std::vector<Client *>::iterator it = members.begin(); it != members.end(); it++)
+    {
+        if (name == (*it)->getNickname())
+        {    
+            members.erase(it);
+            return;
+        }
+    }
+}
+
+void    Server::QUIT()
+{
+    if (!channels.empty())
+    {
+        for(std::vector<Channel *>::iterator it = channels.begin(); it != channels.end(); it++)
+        {
+            delete *it;
+            *it = NULL;
+        }
+        channels.clear();
+        std::vector<Channel *>().swap(channels);
+    }
+    if (!clients.empty())
+    {
+        for(std::vector<Client *>::iterator it = clients.begin(); it != clients.end(); it++)
+        {
+            if ((*it)->getSocket() > 0)
+                close((*it)->getSocket());
+            delete *it;
+            *it = NULL;
+        }        
+        clients.clear();
+        std::vector<Client *>().swap(clients);
+    }
+    close(srv);
+}

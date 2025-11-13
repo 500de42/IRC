@@ -11,6 +11,10 @@ Server::Channel::Channel()
 	o = false;
 }
 
+Server::Channel::~Channel()
+{
+}
+
 void Server::Channel::setTopic(const std::string &name)
 {
     this->topic = name;
@@ -28,11 +32,11 @@ void Server::Channel::setOperator(Client &client)
 
 void Server::Channel::setOffOperator(Client &client)
 {
-    for(size_t i = 0; i < this->operators.size(); i++)
+    for(std::vector<Client *>::iterator i = operators.begin(); i != operators.end(); i++)
     {
-        if (client.getNickname() == this->operators[i]->getNickname())
+        if (client.getNickname() == (*i)->getNickname())
         {
-            operators.erase(operators.begin() + i);
+            operators.erase(i);
             client.setOffOpMap(name); 
         }
     }

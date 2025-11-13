@@ -23,7 +23,7 @@ void TOPIC(Server &server, Client &client, const char *tmp)
     if (word.size() >= 2)
     {
         int pos = buffer.find(':');
-        if (pos)
+        if (pos != (int)std::string::npos)
         {
             newTopic = buffer.substr(pos);
             newTopic.erase(0, 1);
@@ -66,7 +66,7 @@ void TOPIC(Server &server, Client &client, const char *tmp)
             std::string t(client.getNickname() + "!" + client.getUsername() +"@127.0.0.1 : TOPIC: #" + channel.getName() + ":");
             sendMessageAllClient(server, channel, t + newTopic);
             if (!channel.getLastTopicSetter().empty())
-                server.sendMessage(":IRCSERVEUR 333 " + client.getNickname() + channel.getName() + currentTime + "\r\n", client);
+                server.sendMessage(":IRCSERVEUR 333 " + client.getNickname() + channel.getName() + server.getCurrentTime() + "\r\n", client);
             channel.getLastTopicSetter() = client.getNickname();
         }
     }

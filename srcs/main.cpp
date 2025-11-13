@@ -1,40 +1,34 @@
 #include "../includes/Client.hpp"
 #include "../includes/Serveur.hpp"
 
+volatile sig_atomic_t g_running = 1;
+
 int	main(int ac, char **av)
 {
 	ssize_t	bytes;
 	char	buff[512];
+	time_t startT = time(NULL);
+	std::stringstream ss;
+	ss << startT;
 
-	if (ac != 3)
-	{
-		std::cout << "the program must be run like this < ./ircserv <port> <password> >\n";
-		return (1);
-	}
-	if (prohibitedCharacterServerPassword((std::string)av[2]))
-	{
-		std::cout << "The password contains prohibited characters.\n";
-		return (1);
-	}
-	if (!checkNum((std::string)av[1]) || std::atoi(av[1]) < 1024 || std::atoi(av[1]) > 65535)
-	{
-		std::cout << "The port is not correct\n";
-		return (1);
-	}
+	if (checkArg(ac, av))
+		return 1;
+	setup_signal_handlers();
 	Server server(av);
 	if (server.createServer())
 		return (1);
-	while (1)
-	{
+	server.setCurrentTime(ss);
+	while (g_running)
+	{	
 		std::cout << "test reset\n";
 		if (poll(&server.getFds()[0], server.getFds().size(), -1) > 0)
 		{	if (server.getFds()[0].revents & POLLIN)
 			{
 				std::cout << "\n\ntest1\n\n";
 				Client*client = new Client(server.getPort());
-                std::cout << "\n\ntest2\n\n";
+				std::cout << "\n\ntest2\n\n";
 				client->setCliSocket(accept(server.getFds()[0].fd, NULL, NULL));
-                std::cout << "\n\ntest553\n\n";
+				std::cout << "\n\ntest553\n\n";
 				if (client->getSocket() > 0)
 				{
 					struct pollfd server_poll;
@@ -46,10 +40,10 @@ int	main(int ac, char **av)
 					server.getClients().push_back(client);
 					server.getFds().push_back(server_poll);
 				}
-                else
-                    std::cout << "error addind client in vector\n\n";
+				else
+					std::cout << "error addind client in vector\n\n";//CLOSE LE SOCKET ACQUIS VIA ACCEPT
 			}}
-            // std::cout << "\n\ntest4\n\n";
+			// std::cout << "\n\ntest4\n\n";
 		if (server.getClients().size())
 		{
 			for (size_t i = 1; i < server.getFds().size(); i++)
@@ -76,9 +70,26 @@ int	main(int ac, char **av)
 					{
 						std::cout << "\n\ntest9\n\n";
 						std::cout << "Client " << tmp.getSocket() << " déconnecté." << std::endl;
-						close(tmp.getSocket());
+						
+						if (!tmp.getChannels().empty())
+						{
+							for(std::vector<Server::Channel *>::iterator it = tmp.getChannels().begin(); it != tmp.getChannels().end(); it++)
+							{
+								try
+								{
+									Server::Channel &channel = ChannelMatch(server, (*it)->getName());
+									// if(tmp.getOp((*it)->getName()))
+									// 	channel.setOffOperator(tmp);
+									channel.setOfMember(tmp.getNickname());
+									//nommer un autre client OP si celui ci est le seul dans le vecteur
+								}
+								catch(std::exception &e)
+								{}
+							}
+						}
 						server.getClients().erase(server.getClients().begin() + (i - 1));
 						server.getFds().erase(server.getFds().begin() + i);
+						close(tmp.getSocket());
 						delete &tmp;
 						i--;
 					}
@@ -98,5 +109,6 @@ int	main(int ac, char **av)
 			}
 		}
 	}
+	server.QUIT();
 	return (0);
 }

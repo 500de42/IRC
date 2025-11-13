@@ -1,6 +1,28 @@
 #include "../../includes/Serveur.hpp"
 #include "../../includes/Client.hpp"
 
+
+int checkArg(int ac, char **av)
+{
+	if (ac != 3)
+	{
+		std::cout << "the program must be run like this < ./ircserv <port> <password> >\n";
+		return (1);
+	}
+	if (prohibitedCharacterServerPassword((std::string)av[2]))
+	{
+		std::cout << "The password contains prohibited characters.\n";
+		return (1);
+	}
+	if (!checkNum((std::string)av[1]) || std::atoi(av[1]) < 1024 || std::atoi(av[1]) > 65535)
+	{
+		std::cout << "The port is not correct\n";
+		return (1);
+	}
+    return 0;
+}
+
+
 void processCommand(Client &client, Server &server, size_t *i)
 {
     std::string &line = client.getRealBuffer();
@@ -69,7 +91,7 @@ bool execCommand(char *buff , Client &tmp, Server &server, size_t *i)
             NICK(server, tmp, buff);
         else
         {
-            server.sendMessage("421 " + tmp.getNickname() + " " + (std::string)buff + " :Unknown command\r\n", tmp);
+            server.sendMessage("421 " + tmp.getNickname() + " \"" + (std::string)buff + "\" :Unknown command\r\n", tmp);
         }
     }
     return true;

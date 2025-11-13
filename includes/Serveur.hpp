@@ -15,9 +15,7 @@
 #include <sys/signal.h>
 #include <csignal>
 
-time_t startT = time(NULL);
-std::string currentTime = std::to_string(startT);
-int signal;
+extern volatile sig_atomic_t g_running;
 
 class Client;
 
@@ -69,10 +67,12 @@ class Server
 			void setOperator(Client &client);
 			void setOffOperator(Client &client);
 			void setPasssword(const std::string &name);
+			void setOfMember(std::string name);
 			//		OTHERS		//
 			
 			bool hasBeenInvited(std::string name);
 			Channel();
+			~Channel();
 	};
 
 	public:
@@ -83,6 +83,7 @@ class Server
 		bool 	checkDoubleName(const char *name);
 		void 	sendMessage(std::string buffer, Client client);
 		void	addClientInChannel(Server::Channel &channel, Client  &client);
+		void 	QUIT();
 		//		GET			//
 
 		struct sockaddr_in 		&getSockaddr();
@@ -90,10 +91,12 @@ class Server
 		std::vector<Client *> 	&getClients();
 		std::vector<Channel *> 	&getChannels();
 		std::string 			&getPass();
+		std::string 			&getCurrentTime();
 		int 					&getPort();
 
 		//		SET			//
 
+		void 	setCurrentTime(std::stringstream &ss);
 		void 	setPassword(std::string &name);
 		void 	setPort(int Port);
 
@@ -107,6 +110,7 @@ class Server
 		int 					port;
 		std::string 			pass;
 		char 					*buffer;	
+		std::string 			currentTime;
 };
 
 
@@ -132,6 +136,8 @@ void 						sendMessageAllClientKick(Server &server, Server::Channel &channel, st
 std::vector<std::string> 	removeCharacter(std::vector<std::string> vec, char c);
 void 						welcomeMessage(Server &server, Server::Channel &channel, Client  &client);
 void 						sendMessageAllClient(Server &server, Server::Channel &channel, std::string message);
+void						setup_signal_handlers();
+int							checkArg(int ac, char **av);
 
 
 /////////////////////				COMMANDES				/////////////////////
@@ -148,4 +154,8 @@ void	execKick(Server::Channel &channel, Client &target);
 void 	INVITE(Client &client, Server &server, const char *tmp);
 void 	TOPIC(Server &server, Client &client, const char *tmp);
 void 	NICK(Server &server, Client &client, const char *tmp);
+
+
+/////////////////////				SIGNAUX				/////////////////////
+
 

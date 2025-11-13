@@ -20,7 +20,7 @@ void PRIVMSG(Server &server, Client &client, const char *tmp)
     }
     std::vector<std::string> targets = splitCommand(words[0], ',');
     int pos = buffer.find(':');
-    if (pos)
+    if (pos != (int)std::string::npos)
     {
         message = buffer.substr(pos);
         message.erase(0, 1);

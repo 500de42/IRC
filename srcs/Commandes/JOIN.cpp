@@ -24,10 +24,7 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
     }
     std::cout << "JOIN 2" << std::endl;
     if (word.size() == 1 && word[0].size() == 1 && word[0][0] == '0')
-    {
         client.quitAllChannels(server);
-        // gerer tout les channel a quitter //
-    }
     std::cout << "JOIN 2.5" << std::endl;
     std::vector<std::string> channelName = splitCommand(word[0], ',');
 

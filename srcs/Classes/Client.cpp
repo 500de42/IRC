@@ -16,6 +16,10 @@ Client::Client(int port)
 
 }
 
+Client::~Client()
+{
+}
+
 int Client::getServsocket()
 {
     return this->servSocket;
