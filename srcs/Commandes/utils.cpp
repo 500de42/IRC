@@ -288,6 +288,16 @@ void sendMessageAllClient(Server &server, Server::Channel &channel, std::string 
     }
 }
 
+void sendMessageAllClientJoin(Client &client, Server &server, Server::Channel &channel, std::string message)
+{
+    for(size_t i = 0; i < channel.getMembers().size(); i++)
+    {
+        server.sendMessage(message + "\r\n", *channel.getMembers()[i]);
+    }
+    if (!channel.getTopic().empty())
+        server.sendMessage("332 " + client.getNickname() + " #" + channel.getName() + " " + channel.getTopic() + "\r\n", client);
+}
+        
 void welcomeMessage(Server &server, Server::Channel &channel, Client  &client)
 {   
     server.sendMessage(":IRCserver 001 " + client.getNickname() + " :Welcome to the Internet Relay Network " + client.getNickname() + "!" + client.getUsername() +"@127.0.0.1\r\n", client);

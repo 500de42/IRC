@@ -138,6 +138,7 @@ void 						welcomeMessage(Server &server, Server::Channel &channel, Client  &cli
 void 						sendMessageAllClient(Server &server, Server::Channel &channel, std::string message);
 void						setup_signal_handlers();
 int							checkArg(int ac, char **av);
+void						sendMessageAllClientJoin(Client &client, Server &server, Server::Channel &channel, std::string message);
 
 
 /////////////////////				COMMANDES				/////////////////////

@@ -62,7 +62,7 @@ int	main(int ac, char **av)
 					bytes = recv(server.getFds()[i].fd, buff, sizeof(buff) - 1, 0);
 					std::cout << "\n\ntest7.7\n\n";
 					if (bytes > 0)
-					{		
+					{
 						tmp.getRealBuffer().append(buff, bytes);
 						processCommand(tmp, server, &i);
 					}

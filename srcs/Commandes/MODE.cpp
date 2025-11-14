@@ -88,9 +88,11 @@ void setModeOnChannel(std::vector<std::string> word, Client &client, Server &ser
         else
             server.sendMessage("461 4" + client.getNickname() + " MODE :Not enough parameters\r\n", client);
     }
-
+    std::string host(client.getNickname() + "!" + client.getUsername() +"@127.0.0.1 : MODE " + channel.getName());
     for(std::map<char, bool>::iterator i = option.begin(); i != option.end(); i++)
     {
+        if (!parameters.empty())
+            std::cout << "parameters: " << *parameters.begin() << std::endl;
         if (word.size() > 2 && !parameters.empty())
             std::cout << "index: " << *parameters.begin() << std::endl;
         if ((i->first == 'k' || i->first == 'o' || i->first == 'l' ) && i->second && parameters.empty())
@@ -101,16 +103,28 @@ void setModeOnChannel(std::vector<std::string> word, Client &client, Server &ser
         else if (i->first == 'i')
         {
             if (i->second == true)
+            {
                 channel.setI(true);
+                sendMessageAllClient(server, channel, host + " +i");
+            }
             else
+            {
+                sendMessageAllClient(server, channel, host + " -i");
                 channel.setI(false);
+            }
         }
         else if (i->first == 't')
         {
             if (i->second == true)
+            {
+                sendMessageAllClient(server, channel, host + " +t");
                 channel.setT(true);
+            }
             else
+            {
+                sendMessageAllClient(server, channel, host + " -t");
                 channel.setT(false);
+            }
         }
         else if (i->first == 'k')
         {
@@ -118,6 +132,7 @@ void setModeOnChannel(std::vector<std::string> word, Client &client, Server &ser
             {
                 if (!prohibidedCharacterModePassword(*parameters.begin()))
                 {
+                    sendMessageAllClient(server, channel, host + " +k " + *parameters.begin());
                     channel.setPasssword(*parameters.begin());
                     channel.setK(true);
                 }
@@ -131,7 +146,8 @@ void setModeOnChannel(std::vector<std::string> word, Client &client, Server &ser
             }
             else
             {
-                channel.setK(false);
+                sendMessageAllClient(server, channel, host + " -k");
+                channel.setK(false); 
                 channel.setPasssword("");
             }
         }
@@ -139,12 +155,28 @@ void setModeOnChannel(std::vector<std::string> word, Client &client, Server &ser
         {
             if (!matchChannelMember(*parameters.begin(), channel))
             {
-                if (i->second == true)
-                    channel.setOperator(client);
-                else
-                    channel.setOffOperator(client);
-                if (word.size() > 2 && !parameters.empty())
-                    parameters.erase(parameters.begin());
+                 try
+                {
+                    Client &target = clientMatch(*parameters.begin(), server);
+                    
+                    if (i->second == true)
+                    {
+                        sendMessageAllClient(server, channel, host + " +o " + *parameters.begin());
+                        channel.setOperator(client);
+                        target.setOp(channel.getName(), true);
+                    }
+                    else
+                    {
+                        sendMessageAllClient(server, channel, host + " -o");
+                        channel.setOffOperator(client);
+                    }
+                    if (word.size() > 2 && !parameters.empty())
+                        parameters.erase(parameters.begin());
+                }
+                catch(std::exception &e)
+                {
+                    server.sendMessage("441 " + client.getNickname() + " MODE :The client aren't in that channel\r\n", client);
+                }
             }
             else
                 server.sendMessage("441 " + client.getNickname() + " MODE :The client aren't in that channel\r\n", client);
@@ -155,17 +187,18 @@ void setModeOnChannel(std::vector<std::string> word, Client &client, Server &ser
             {
                 if (i->second == true)
                 {
-                    std::cout << "limite rentrer: " << atol((*parameters.begin()).c_str()) << std::endl;
+                    sendMessageAllClient(server, channel, host + " +l " + *parameters.begin());
                     channel.setL(true);
                     channel.setMembersLimit(atol((*parameters.begin()).c_str()));
                 }
                 else
                 {
+                    sendMessageAllClient(server, channel, host + " -l");
                     channel.setL(false);
                     channel.setMembersLimit(0);
                 }
-                    if (word.size() > 2 && !parameters.empty())
-                        parameters.erase(parameters.begin());
+                if (word.size() > 2 && !parameters.empty())
+                    parameters.erase(parameters.begin());
             }
             else
                 server.sendMessage("461 4" + client.getNickname() + " MODE :Not enough parameters\r\n", client);
@@ -177,7 +210,7 @@ bool matchChannelMember(std::string name, Server::Channel channel)
 {
     for (size_t i = 0; i < channel.getMembers().size(); i++)
     {
-        std::cout << "channel members: "<< channel.getMembers()[i]->getNickname() << "NAME: " << name << std::endl;
+        std::cout << "channel members: "<< channel.getMembers()[i]->getNickname() << " NAME: " << name << std::endl;
         if (name == channel.getMembers()[i]->getNickname())
             return false;
     }

@@ -27,7 +27,6 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
         client.quitAllChannels(server);
     std::cout << "JOIN 2.5" << std::endl;
     std::vector<std::string> channelName = splitCommand(word[0], ',');
-
     std::cout << "JOIN 2.6" << std::endl;
     std::vector<std::string> passwordCommand;
     std::cout << "JOIN 3" << std::endl;
@@ -43,8 +42,10 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
         }
     }
     std::cout << "JOIN 5" << std::endl;
+    
     for (size_t i = 0; i < channelName.size(); i++)
-    {  
+    { 
+        std::string host(client.getNickname() + "!" + client.getUsername() +"@127.0.0.1 : JOIN " + channelName[i]); 
         std::cout << "JOIN 5.2" << std::endl;
         if(prohibidedCharacterJoin(channelName[i], true))
         {
@@ -69,6 +70,7 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
                 channel->getMembers().push_back(&client);
                 server.getChannels().push_back(channel);
                 welcomeMessage(server, *channel, client);
+                sendMessageAllClientJoin(client, server, *channel, host);
             }
             else
             {
@@ -99,6 +101,7 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
                             }
                             std::cout << "JOIN 7.6" << std::endl;
                             server.addClientInChannel(channel, client);
+                            sendMessageAllClientJoin(client, server, channel, host);
                         }
                         else
                         {
@@ -109,7 +112,10 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
                     else if (channel.getL())
                     {
                         if(channel.getMembers().size() + 1 <= channel.getMembersLimit())
+                        {
                             server.addClientInChannel(channel, client);
+                            sendMessageAllClientJoin(client, server, channel, host);
+                        }
                         else
                         {
                             std::cout << "JOIN 7.7" << std::endl;
@@ -120,7 +126,10 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
                     else if (channel.getI())
                     {
                         if (channel.hasBeenInvited(client.getNickname()))
+                        {
                             server.addClientInChannel(channel, client);
+                            sendMessageAllClientJoin(client, server, channel, host);
+                        }
                         else
                             server.sendMessage("475 " + client.getNickname() + " " + tmp + " :Cannot join channel (+i)\r\n", client);
                     }
@@ -129,6 +138,7 @@ void extractAndSetJoin(Client &client, Server &server, std::string tmp)
                         std::cout << "JOIN 7.8" << std::endl;
                         server.addClientInChannel(channel, client);
                         std::cout << "JOIN 7.9" << std::endl;
+                        sendMessageAllClientJoin(client, server, channel, host);
                     }
                 }
                 catch(std::exception &e) 

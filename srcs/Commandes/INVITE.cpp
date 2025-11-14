@@ -59,7 +59,7 @@ void execInvite(Client &client, Server &server, std::string tmp)
                 return;
             }
             std::string host(client.getNickname() + "!" + client.getUsername() +"@127.0.0.1 : INVITE ");
-            server.sendMessage("IRCSERVER.127.0.0.1 341" + target.getNickname() + " " + client.getNickname() + " " + words[1] + "\r\n", client);
+            server.sendMessage("IRCSERVER.127.0.0.1 341 " + target.getNickname() + " " + client.getNickname() + " #" + words[1] + "\r\n", client);
             server.sendMessage(host + client.getNickname() + " #" + words[1] + "\r\n", target);
             channel.getInvitedMembers().push_back(target.getNickname());
         }

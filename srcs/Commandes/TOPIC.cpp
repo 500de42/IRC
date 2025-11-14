@@ -34,6 +34,8 @@ void TOPIC(Server &server, Client &client, const char *tmp)
             return;
         }
     }
+    word[0].erase(0,1);
+    channelName = word[0];
     try
     {
         Server::Channel &channel = ChannelMatch(server, channelName);
