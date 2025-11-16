@@ -1,12 +1,12 @@
 #include "../../includes/Serveur.hpp"
 #include "../../includes/Client.hpp"
+#include <fcntl.h>
 
 Server::Server(char **av)
 {
     std::string p(av[2]);
     srv = -1;
     this->setPassword(p);
-    std::cout << "pass " << this->pass << " " << "\n";
 	this->setPort(std::atoi(av[1]));
 }
 
@@ -27,13 +27,13 @@ int Server::createServer()
         close(srv);
         return 1;
     }
-    std::cout << "Bind ok" << std::endl;
     if (listen(srv, 10))
     {
         std::cerr << "Listen error" << std::endl;
         close(srv);
         return 1;
     }
+    fcntl(srv, F_SETFL, O_NONBLOCK);
     struct pollfd server_poll;
     memset(&server_poll, 0, sizeof(pollfd));
     server_poll.fd = srv;
@@ -46,7 +46,7 @@ void Server::addClientInChannel(Server::Channel &channel, Client  &client)
 {
     channel.getMembers().push_back(&client);
     client.getChannels().push_back(&channel);
-    welcomeMessage(*this, channel, client);
+    welcomeMessage(*this, client);
 }
 
 std::vector<Client*> &Server::getClients()

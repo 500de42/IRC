@@ -10,7 +10,6 @@ void PRIVMSG(Server &server, Client &client, const char *tmp)
    std::string message;
     std::string w;
 
-    std::cout << "PRIVMSG 1" << std::endl;
     while (ss >> w)
         words.push_back(w);
     if (words.empty() || words.size() < 2 )
@@ -50,7 +49,7 @@ void PRIVMSG(Server &server, Client &client, const char *tmp)
                     server.sendMessage("442 " + client.getNickname() + " PRIVMSG :You are not channel member\r\n", client);
                     continue;
                 }
-                sendMessageAllClient(server, channel, host + " #" + channel.getName() + message);
+                sendMessageAllClient(server, channel, host + "#" + channel.getName() + " :" + message);
             }
             catch(std::exception &e)
             {
@@ -63,8 +62,8 @@ void PRIVMSG(Server &server, Client &client, const char *tmp)
             {
                 Client &target = clientMatch(*it, server);
                 
-                server.sendMessage(host +  target.getNickname() + " " + message + "\r\n", target);
-                server.sendMessage(host +  target.getNickname() + " " + message + "\r\n", client);
+                server.sendMessage(host + target.getNickname() + " :" + message + "\r\n", target);
+                server.sendMessage(host + target.getNickname() + " :" + message + "\r\n", client);
             }
             catch(std::exception &e)
             {

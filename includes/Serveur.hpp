@@ -134,12 +134,14 @@ Client 						&clientMatch(std::string name,  Server server);
 void 						removeChannelMember(Server::Channel &channel, Client &client);
 void 						sendMessageAllClientKick(Server &server, Server::Channel &channel, std::vector<std::string> words, Client client);
 std::vector<std::string> 	removeCharacter(std::vector<std::string> vec, char c);
-void 						welcomeMessage(Server &server, Server::Channel &channel, Client  &client);
+void						welcomeMessage(Server &server, Client  &client);
 void 						sendMessageAllClient(Server &server, Server::Channel &channel, std::string message);
 void						setup_signal_handlers();
 int							checkArg(int ac, char **av);
 void						sendMessageAllClientJoin(Client &client, Server &server, Server::Channel &channel, std::string message);
-
+std::string					actualTime();
+std::string					timeToString(time_t val);
+void 						welcomeChannelMessage(Server &server, Client  &client, Server::Channel &channel);
 
 /////////////////////				COMMANDES				/////////////////////
 
@@ -155,6 +157,7 @@ void	execKick(Server::Channel &channel, Client &target);
 void 	INVITE(Client &client, Server &server, const char *tmp);
 void 	TOPIC(Server &server, Client &client, const char *tmp);
 void 	NICK(Server &server, Client &client, const char *tmp);
+void 	PRIVMSG(Server &server, Client &client, const char *tmp);
 
 
 /////////////////////				SIGNAUX				/////////////////////

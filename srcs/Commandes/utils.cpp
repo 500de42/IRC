@@ -40,16 +40,12 @@ void processCommand(Client &client, Server &server, size_t *i)
 
 bool execCommand(char *buff , Client &tmp, Server &server, size_t *i)
 {(void)i;
-    std::cout << "\n\ntest8\n\n";
-    std::cout << "buffer: "<< buff << "\n\ntest9\n\n";
 
     if (!tmp.getRegister())
     {
-        std::cout << "usernick entree\n";
         if (!strncmp(buff, "USER ", 5) || !strncmp(buff, "NICK ", 5))
         {
             setUserAndNick(tmp, server, buff);
-            std::cout << "setusernick fini11\n";
         }
         else if (!strncmp(buff, "PASS ", 5) && !tmp.getGivenPassword())
         {
@@ -61,17 +57,14 @@ bool execCommand(char *buff , Client &tmp, Server &server, size_t *i)
         }
         else
         {
-            std::cout << "Not registered client : " << buff  << "\n";
             server.sendMessage("451 " + (std::string)buff + " :You may not registered\r\n", tmp);
             return true;
         }
         if (!tmp.getNickname().empty() && !tmp.getUsername().empty() && tmp.getGivenPassword())
         {
-            std::cout << "Nouvelle connexion acceptée. FD: "  << tmp.getSocket() << std::endl;
             tmp.onRegisted();
-            server.sendMessage("001 " + tmp.getNickname() +  " :Welcome to the Internet Relay Network " + tmp.getNickname() + "!" + tmp.getUsername() + "@127.0.0.1\r\n", tmp);
+            welcomeMessage(server, tmp);
         }
-        std::cout << "setusernick fini\n";
     }
     else
     { // METTRE EN PLACE POINTEUR SUR METHODES
@@ -85,6 +78,8 @@ bool execCommand(char *buff , Client &tmp, Server &server, size_t *i)
             TOPIC(server, tmp, buff + 5);
         else if (!strncmp(buff, "MODE ", 5))
             MODE(server, tmp, buff);
+        else if (!strncmp(buff, "PRIVMSG ", 8))
+            PRIVMSG(server, tmp, buff + 7);
         else if (!strncmp(buff, "USER ", 5))
             server.sendMessage("462" + (std::string)buff + ":Unauthorized command (already registered)\r\n", tmp);
         else if (!strncmp(buff, "NICK ", 5))
@@ -114,10 +109,9 @@ bool prohibidedCharacter(std::string tmp)
 {
     for (std::string::iterator i = tmp.begin(); i != tmp.end(); i++)
     {
-        if ((*i == ' ' || *i == ',' || *i == '*' || *i == '?' 
-            || *i == '!' || *i == '@' || *i >= 0) && *i <= 31)
+        if (*i == ' ' || *i == ',' || *i == '*' || *i == '?' 
+            || *i == '!' || *i == '@')
         {
-            std::cout << ":server_name 461 * USER :Not enough parameters\n";
             return true;
         }
     }
@@ -130,11 +124,9 @@ std::string extractMessage(char *tmp)
         return "";
     std::string line(tmp);
 
-    std::cout << "|" << line << "|" << std::endl;
     if (line.size() < 2 && tmp[0] != ' ')
         return "";
     line.erase(0, 1);
-    std::cout << "|" << line << "|" << std::endl;
     return line;
 }
 
@@ -257,7 +249,6 @@ void removeChannelMember(Server::Channel &channel, Client &client)
                 }
                 else
                 {    
-                    std::cout << "channel client vide \n";
                     break;
                 }
             }
@@ -298,14 +289,12 @@ void sendMessageAllClientJoin(Client &client, Server &server, Server::Channel &c
         server.sendMessage("332 " + client.getNickname() + " #" + channel.getName() + " " + channel.getTopic() + "\r\n", client);
 }
         
-void welcomeMessage(Server &server, Server::Channel &channel, Client  &client)
+void welcomeMessage(Server &server, Client  &client)
 {   
     server.sendMessage(":IRCserver 001 " + client.getNickname() + " :Welcome to the Internet Relay Network " + client.getNickname() + "!" + client.getUsername() +"@127.0.0.1\r\n", client);
-    server.sendMessage(":IRCserver 002 " + client.getNickname() + " :Your host is " + channel.getName() + ", running version 1.0\r\n", client);
-    server.sendMessage(":IRCserver 003 " + client.getNickname() + " :This server was created<date a init>\r\n", client);
+    server.sendMessage(":IRCserver 002 " + client.getNickname() + " :Your host is IRCSERVEUR, running version 1.0\r\n", client);
+    server.sendMessage(":IRCserver 003 " + client.getNickname() + " :This server was created " + actualTime() + "\r\n", client);
     server.sendMessage(":IRCserver 004 " + client.getNickname() + " :" +client.getNickname() + " IRCserver 1.0 o itklo" +  "\r\n", client);
-    // server.sendMessage(":IRCserver 321 " + client.getNickname() + " :Channel :Users Topic\r\n",client);
-    // server.sendMessage(":IRCserver 323 " + client.getNickname() + " :End of /LIST\r\n",client);
 }
 
 std::vector<std::string> removeCharacter(std::vector<std::string> vec, char c)
@@ -313,7 +302,6 @@ std::vector<std::string> removeCharacter(std::vector<std::string> vec, char c)
     std::vector<std::string> word;
     std::string w;
     int check = 0;
-    std::cout << vec[0] << " " << vec[1] << " " << vec[2] << std::endl;
     for (std::vector<std::string>::iterator it = vec.begin(); it != vec.end(); it++)
     {    
         for (size_t i = 0; i < (*it).size(); i++)
@@ -331,16 +319,33 @@ std::vector<std::string> removeCharacter(std::vector<std::string> vec, char c)
     return word;
 }
 
-    // for(size_t i = 0; i < channel.getMembers().size(); i++)
-    // {
-    //     server.sendMessage(":" + client.getNickname() + "!" + client.getUsername() +"@127.0.0.1 JOIN #" + channel.getName(), *channel.getMembers()[i]);
-    // }
-    // if (channel.getT())
-    //     server.sendMessage(": 332 " + client.getNickname() + " " + channel.getName() + ":" + channel.getTopic(), client);
-    // server.sendMessage(": 353 " + client.getNickname() + " = " + channel.getName() + ":", client);   
-    // for(size_t i = 0; i < channel.getMembers().size(); i++)
-    // {
-    //     server.sendMessage(": 353 " + client.getNickname() + " = " + channel.getName() + ":" + channel.getTopic(), client);
-    // }
+std::string actualTime()
+{
+    char buffer[100]; 
+    time_t raw_time = time(NULL);
+    struct tm *time_info = localtime(&raw_time); 
 
+    // %a (Jour abrégé), %b (Mois abrégé), %d (Jour du mois), 
+    // %Y (Année), %H (Heure), %M (Minute), %S (Seconde)
+    strftime(buffer, sizeof(buffer), "%a %b %d %Y at %H:%M:%S", time_info);
+    
+    return std::string(buffer);
+}
 
+std::string timeToString(time_t val) 
+{
+    std::stringstream ss;
+    ss << val;
+    return ss.str();
+}
+
+void welcomeChannelMessage(Server &server, Client  &client, Server::Channel &channel)
+{
+    time_t tt = time(NULL);
+    if (!channel.getTopic().empty())
+        server.sendMessage(":IRCserver 332 " + client.getNickname() + " " + channel.getName() + ": " + channel.getTopic() + "\r\n", client);
+    server.sendMessage(":IRCSERVEUR 333 " + client.getNickname() + channel.getName() + " " + timeToString(tt) + "\r\n", client);    
+    std::string clientList;
+    server.sendMessage(":IRCSERVEUR 353 " + client.getNickname() + " = #" + channel.getName() + " " + clientList +  "\r\n", client);
+    server.sendMessage(":IRCSERVEUR 366 " + client.getNickname() + channel.getName() + " :End of /NAMES list.\r\n", client);    
+}

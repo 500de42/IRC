@@ -2,18 +2,15 @@
 #include "../../includes/Client.hpp"
 
 Client::Client(int port)
-{	std::cout << "\n\ntestclient\n\n";
-
+{
     std::memset(&cli_addr, 0, sizeof(cli_addr));
     this->cli_addr.sin_port = htons(port);
     this->cli_addr.sin_family = AF_INET;
-    this->cli_addr.sin_addr.s_addr = inet_addr("127.0.1.0");
+    this->cli_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     cliSocket = -1;
     servSocket = -1;
     isRegistred = false;
     goodPass = false;
-    std::cout << "\n\ntestclient2\n\n";
-
 }
 
 Client::~Client()

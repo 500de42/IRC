@@ -11,7 +11,6 @@ void TOPIC(Server &server, Client &client, const char *tmp)
     std::string newTopic;
     std::string w;
 
-    std::cout << "JOIN 1" << std::endl;
     while (ss >> w)
         word.push_back(w);
 
@@ -67,8 +66,9 @@ void TOPIC(Server &server, Client &client, const char *tmp)
                 channel.getTopic() = newTopic;
             std::string t(client.getNickname() + "!" + client.getUsername() +"@127.0.0.1 : TOPIC: #" + channel.getName() + ":");
             sendMessageAllClient(server, channel, t + newTopic);
+            time_t tt = time(NULL);
             if (!channel.getLastTopicSetter().empty())
-                server.sendMessage(":IRCSERVEUR 333 " + client.getNickname() + channel.getName() + server.getCurrentTime() + "\r\n", client);
+                server.sendMessage(":IRCSERVEUR 333 " + client.getNickname() + channel.getName() + " " + timeToString(tt) + "\r\n", client);
             channel.getLastTopicSetter() = client.getNickname();
         }
     }

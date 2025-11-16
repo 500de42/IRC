@@ -15,7 +15,7 @@ void MODE(Server &server, Client &client, const char *tmp)
 
     if (buffer.size() < 2)
     {
-        server.sendMessage("461 1" + client.getNickname() + " MODE :Not enough parameters\r\n", client);
+        server.sendMessage("461 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
         return ;
     }
     extractAndSetMode(client, server, buffer);
@@ -33,7 +33,7 @@ void extractAndSetMode(Client &client, Server &server, std::string tmp)
 
     if (word.empty() || word.size() < 2 || word[0].empty() || word[0].size() < 2 || word[0][0] != '#')
     {
-        server.sendMessage("461 2" + client.getNickname() + " MODE :Not enough parameters\r\n", client);
+        server.sendMessage("461 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
         return;
     }
 
@@ -55,7 +55,7 @@ void extractAndSetMode(Client &client, Server &server, std::string tmp)
     }
     catch(std::exception &e)
     {
-        server.sendMessage("403 1" + client.getNickname() + " MODE :Channel(" + word[0] + ") does not exist\r\n", client);
+        server.sendMessage("403 " + client.getNickname() + " MODE :Channel(" + word[0] + ") does not exist\r\n", client);
         return;
     }
 }
@@ -67,13 +67,9 @@ void setModeOnChannel(std::vector<std::string> word, Client &client, Server &ser
 
     if (word.size() > 2)
         parameters.assign(word.begin() + 2, word.end());
-    int nbParameters = word.size() - 2;
-    int executedParameters = 0;
-    std::cout << "nbparametre. " << nbParameters << " executedParameters. " << executedParameters  << "word: " << word[0] << " " << word[1] << " size: "<< word.size() << std::endl;
     if (prohibidedCharacterMode(word[1]) || word[1].size() < 2)
     {
-        std::cout << "test caractere interdit :" << prohibidedCharacterMode(word[1]) << "  size:" << word[1].size() << "word[1]: " << word[1] << std::endl;
-        server.sendMessage("461 3" + client.getNickname() + " MODE :Not enough parameters\r\n", client);
+        server.sendMessage("461 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
         return;   
     }
     for (std::string::iterator i = word[1].begin() + 1; i != word[1].end(); i++)
@@ -86,19 +82,14 @@ void setModeOnChannel(std::vector<std::string> word, Client &client, Server &ser
                 option[*i] = false;
         }
         else
-            server.sendMessage("461 4" + client.getNickname() + " MODE :Not enough parameters\r\n", client);
+            server.sendMessage("461 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
     }
     std::string host(client.getNickname() + "!" + client.getUsername() +"@127.0.0.1 : MODE " + channel.getName());
     for(std::map<char, bool>::iterator i = option.begin(); i != option.end(); i++)
     {
-        if (!parameters.empty())
-            std::cout << "parameters: " << *parameters.begin() << std::endl;
-        if (word.size() > 2 && !parameters.empty())
-            std::cout << "index: " << *parameters.begin() << std::endl;
         if ((i->first == 'k' || i->first == 'o' || i->first == 'l' ) && i->second && parameters.empty())
         {            
-            std::cout << "parameters: " << *parameters.begin() << "i->first: " << i->first << "second: " << i->second << std::endl;
-            server.sendMessage("461 3" + client.getNickname() + " MODE :Not enough parameters\r\n", client);
+            server.sendMessage("461 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
         }
         else if (i->first == 'i')
         {
@@ -138,7 +129,6 @@ void setModeOnChannel(std::vector<std::string> word, Client &client, Server &ser
                 }
                 else
                 { 
-                    std::cout << "parameters.begin() " << *parameters.begin() << std::endl;
                     server.sendMessage("476 " + client.getNickname() + " " + channel.getName() + " MODE :Not enough parameters\r\n" ,client);
                 }
                 if (word.size() > 2 && !parameters.empty())
@@ -201,7 +191,7 @@ void setModeOnChannel(std::vector<std::string> word, Client &client, Server &ser
                     parameters.erase(parameters.begin());
             }
             else
-                server.sendMessage("461 4" + client.getNickname() + " MODE :Not enough parameters\r\n", client);
+                server.sendMessage("461 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
         }
     }
 }
@@ -210,7 +200,6 @@ bool matchChannelMember(std::string name, Server::Channel channel)
 {
     for (size_t i = 0; i < channel.getMembers().size(); i++)
     {
-        std::cout << "channel members: "<< channel.getMembers()[i]->getNickname() << " NAME: " << name << std::endl;
         if (name == channel.getMembers()[i]->getNickname())
             return false;
     }

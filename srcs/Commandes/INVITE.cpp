@@ -13,7 +13,6 @@ void INVITE(Client &client, Server &server, const char *tmp)
         return ;
     }
     buffer.erase(0,6);
-    std::cout << "buffer invite: " << buffer << std::endl;
     execInvite(client, server, buffer);
 }
 
@@ -24,7 +23,6 @@ void execInvite(Client &client, Server &server, std::string tmp)
     std::vector<std::string> words;
     std::string w;
 
-    std::cout << "INVITE 1" << std::endl;
     while (ss >> w)
         words.push_back(w);
     if (words.empty() || words.size() != 2 || words[1].size() < 2 || *words[1].begin() != '#')
@@ -33,7 +31,6 @@ void execInvite(Client &client, Server &server, std::string tmp)
         return ;
     }
     words[1].erase(0, 1);
-    std::cout << "invite : " << words[0] << " " << words[1]<< std::endl;
     try
     {
         Server::Channel &channel = ChannelMatch(server, words[1]);

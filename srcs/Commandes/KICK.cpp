@@ -1,8 +1,6 @@
 #include "../../includes/Serveur.hpp"
 #include "../../includes/Client.hpp"
 
-//CHECK LES ARGUMENTS DE LA COMMANDE
-
 void    KICK(Server &server, Client &client, const char *tmp)
 {
     std::string buff(tmp);
@@ -22,7 +20,6 @@ void    KICK(Server &server, Client &client, const char *tmp)
             words.push_back(w); // join les messages apres le ':'
         if (words.size() < 3 || words[1][0] != '#' || words[1].size() < 2)
         {
-            std::cout << "size: " << words.size() << " caractere diez " << words[1][0] << "sa taile " << words[1].size() << std::endl;
             server.sendMessage("461 1" + client.getNickname() + " KICK :Not enough parameters\r\n", client);
             return;
         }
@@ -86,7 +83,6 @@ void    KICK(Server &server, Client &client, const char *tmp)
                 {
                     for(size_t i = 0; i < server.getClients().size(); i++)
                     {
-                        std::cout << server.getClients()[i]->getNickname() << std::endl;
                     }
                     server.sendMessage("401 " + client.getNickname() + " KICK :The target(" + *it + ") don't exist\r\n", client);
                 }
@@ -95,7 +91,6 @@ void    KICK(Server &server, Client &client, const char *tmp)
         }
         catch(const std::exception& e)
         {
-            std::cout << "WORD[0] KICK: " << words[0] << " WORD[1]" << words[1]  << "2 " << words[2]  << "nb de channel sur le serveur: " << server.getChannels().size() << std::endl;   
             server.sendMessage("403 " + client.getNickname() + " KICK :Channel(" + words[0] + ") don't exist\r\n", client);
         } 
     }
