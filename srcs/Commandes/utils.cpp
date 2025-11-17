@@ -84,12 +84,33 @@ bool execCommand(char *buff , Client &tmp, Server &server, size_t *i)
             server.sendMessage("462" + (std::string)buff + ":Unauthorized command (already registered)\r\n", tmp);
         else if (!strncmp(buff, "NICK ", 5))
             NICK(server, tmp, buff);
+        else if (!strncmp(buff, "PING ", 5))
+            PING(server, tmp, buff);
         else
         {
             server.sendMessage("421 " + tmp.getNickname() + " \"" + (std::string)buff + "\" :Unknown command\r\n", tmp);
         }
     }
     return true;
+}
+
+void PING(Server &server, Client &client, char *buff)
+{
+    std::string buffer(buff);
+    std::stringstream ss(buffer);
+    std::vector<std::string> words;
+    std::string w;
+
+    while (ss >> w)
+        words.push_back(w);
+    std::cout << "buffer ping:" << buffer << words[1] << std::endl;
+    if(words.size() != 2)
+    {
+        server.sendMessage("461 " + client.getNickname() + " PING :Not enough parameters\r\n", client);
+        return ;
+    }
+    std::cout << "buffer ping:" << buffer << words[1] << std::endl;
+    server.sendMessage("PONG : " + words[1] + "\r\n", client);
 }
 
 
@@ -293,7 +314,7 @@ void welcomeMessage(Server &server, Client  &client)
 {   
     server.sendMessage(":IRCserver 001 " + client.getNickname() + " :Welcome to the Internet Relay Network " + client.getNickname() + "!" + client.getUsername() +"@127.0.0.1\r\n", client);
     server.sendMessage(":IRCserver 002 " + client.getNickname() + " :Your host is IRCSERVEUR, running version 1.0\r\n", client);
-    server.sendMessage(":IRCserver 003 " + client.getNickname() + " :This server was created " + actualTime() + "\r\n", client);
+    server.sendMessage(":IRCserver 003 " + client.getNickname() + " :This server was created " + server.actualTime() + "\r\n", client);
     server.sendMessage(":IRCserver 004 " + client.getNickname() + " :" +client.getNickname() + " IRCserver 1.0 o itklo" +  "\r\n", client);
 }
 
@@ -317,19 +338,6 @@ std::vector<std::string> removeCharacter(std::vector<std::string> vec, char c)
     if (!check)
         return vec;
     return word;
-}
-
-std::string actualTime()
-{
-    char buffer[100]; 
-    time_t raw_time = time(NULL);
-    struct tm *time_info = localtime(&raw_time); 
-
-    // %a (Jour abrégé), %b (Mois abrégé), %d (Jour du mois), 
-    // %Y (Année), %H (Heure), %M (Minute), %S (Seconde)
-    strftime(buffer, sizeof(buffer), "%a %b %d %Y at %H:%M:%S", time_info);
-    
-    return std::string(buffer);
 }
 
 std::string timeToString(time_t val) 

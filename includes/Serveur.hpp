@@ -91,15 +91,14 @@ class Server
 		std::vector<Client *> 	&getClients();
 		std::vector<Channel *> 	&getChannels();
 		std::string 			&getPass();
-		std::string 			&getCurrentTime();
 		int 					&getPort();
 
 		//		SET			//
 
-		void 	setCurrentTime(std::stringstream &ss);
+		void 	setTime(time_t &ss);
 		void 	setPassword(std::string &name);
 		void 	setPort(int Port);
-
+		std::string		actualTime();
 	private:
 		struct sockaddr_in 		serv_addr;
 		int 					srv;
@@ -111,6 +110,7 @@ class Server
 		std::string 			pass;
 		char 					*buffer;	
 		std::string 			currentTime;
+		time_t					creationTime;
 };
 
 
@@ -139,7 +139,6 @@ void 						sendMessageAllClient(Server &server, Server::Channel &channel, std::s
 void						setup_signal_handlers();
 int							checkArg(int ac, char **av);
 void						sendMessageAllClientJoin(Client &client, Server &server, Server::Channel &channel, std::string message);
-std::string					actualTime();
 std::string					timeToString(time_t val);
 void 						welcomeChannelMessage(Server &server, Client  &client, Server::Channel &channel);
 
@@ -158,7 +157,7 @@ void 	INVITE(Client &client, Server &server, const char *tmp);
 void 	TOPIC(Server &server, Client &client, const char *tmp);
 void 	NICK(Server &server, Client &client, const char *tmp);
 void 	PRIVMSG(Server &server, Client &client, const char *tmp);
-
+void	PING(Server &server, Client &client, char *buff);
 
 /////////////////////				SIGNAUX				/////////////////////
 

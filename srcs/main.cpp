@@ -9,8 +9,6 @@ int	main(int ac, char **av)
 	ssize_t	bytes;
 	char	buff[512];
 	time_t startT = time(NULL);
-	std::stringstream ss;
-	ss << startT;
 
 	if (checkArg(ac, av))
 		return 1;
@@ -18,7 +16,7 @@ int	main(int ac, char **av)
 	Server server(av);
 	if (server.createServer())
 		return (1);
-	server.setCurrentTime(ss);
+	server.setTime(startT);
 	while (g_running)
 	{	
 		if (poll(&server.getFds()[0], server.getFds().size(), -1) > 0)

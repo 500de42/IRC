@@ -7,8 +7,9 @@ void PRIVMSG(Server &server, Client &client, const char *tmp)
     std::stringstream ss(tmp);
     std::string buffer(tmp);
     std::vector<std::string> words;
-   std::string message;
+    std::string message;
     std::string w;
+    std::string host(client.getNickname() + "!" + client.getUsername() +"@127.0.0.1 : PRIVMSG ");
 
     while (ss >> w)
         words.push_back(w);
@@ -17,6 +18,7 @@ void PRIVMSG(Server &server, Client &client, const char *tmp)
         server.sendMessage("461 " + client.getNickname() + " PRIVMSG :Not enough parameters\r\n", client);
         return ;
     }
+    std::cout << "words" << words[1] << std::endl;
     std::vector<std::string> targets = splitCommand(words[0], ',');
     int pos = buffer.find(':');
     if (pos != (int)std::string::npos)
@@ -29,7 +31,6 @@ void PRIVMSG(Server &server, Client &client, const char *tmp)
         server.sendMessage("461 " + client.getNickname() + " PRIVMSG :Not enough parameters\r\n", client);
         return;
     }
-    std::string host(client.getNickname() + "!" + client.getUsername() +"@127.0.0.1 : PRIVMSG ");
     for(std::vector<std::string>::iterator it = targets.begin(); it != targets.end(); it++)
     {
         if (*(*it).begin() == '#')

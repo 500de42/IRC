@@ -120,14 +120,21 @@ std::string &Server::getPass()
     return pass;
 }
 
-void 	Server::setCurrentTime(std::stringstream &ss)
+void 	Server::setTime(time_t &ss)
 {
-    currentTime = ss.str();
+    creationTime = ss;
 }
 
-std::string &Server::getCurrentTime()
+std::string Server::actualTime()
 {
-    return currentTime;
+    char buffer[100]; 
+    struct tm *time_info = localtime(&creationTime); 
+
+    // %a (Jour abrégé), %b (Mois abrégé), %d (Jour du mois), 
+    // %Y (Année), %H (Heure), %M (Minute), %S (Seconde)
+    strftime(buffer, sizeof(buffer), "%a %b %d %Y at %H:%M:%S", time_info);
+    
+    return std::string(buffer);
 }
 
 std::string 	&Server::Channel::getLastTopicSetter()
