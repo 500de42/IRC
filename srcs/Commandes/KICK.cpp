@@ -18,7 +18,7 @@ void    KICK(Server &server, Client &client, const char *tmp)
     {
         while (ss >> w)
             words.push_back(w); // join les messages apres le ':'
-        if (words.size() < 3 || words[1][0] != '#' || words[1].size() < 2)
+        if (words.size() < 3 || (words[1][0] != '#' && words[1][0] != '&') || words[1].size() < 2)
         {
             server.sendMessage("461 1" + client.getNickname() + " KICK :Not enough parameters\r\n", client);
             return;

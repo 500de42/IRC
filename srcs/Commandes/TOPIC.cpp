@@ -14,7 +14,7 @@ void TOPIC(Server &server, Client &client, const char *tmp)
     while (ss >> w)
         word.push_back(w);
 
-    if  (word.empty() || word[0].size() < 2 || *word[0].begin() != '#')
+    if  (word.empty() || word[0].size() < 2 || (*word[0].begin() != '#' && *word[0].begin() != '&'))
     {
         server.sendMessage("461 " + client.getNickname() + " TOPIC :Not enough parameters\r\n", client);
         return ;

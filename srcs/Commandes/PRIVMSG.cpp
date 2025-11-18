@@ -9,7 +9,7 @@ void PRIVMSG(Server &server, Client &client, const char *tmp)
     std::vector<std::string> words;
     std::string message;
     std::string w;
-    std::string host(client.getNickname() + "!" + client.getUsername() +"@127.0.0.1 : PRIVMSG ");
+    std::string host(":" + client.getNickname() + "!" + client.getUsername() +"@127.0.0.1 : PRIVMSG ");
 
     while (ss >> w)
         words.push_back(w);
@@ -31,46 +31,63 @@ void PRIVMSG(Server &server, Client &client, const char *tmp)
         server.sendMessage("461 " + client.getNickname() + " PRIVMSG :Not enough parameters\r\n", client);
         return;
     }
-    for(std::vector<std::string>::iterator it = targets.begin(); it != targets.end(); it++)
+    if (!message.empty() && message[0] == '\x01' && message[message.size() - 1] == '\x01')
     {
-        if (*(*it).begin() == '#')
+        try
         {
-            if ((*it).size() < 2)
+            Client &target = clientMatch(words[0], server);
+            std::cout << "envoie reussi\n";
+            server.sendMessage("PRIVMSG " + target.getNickname() + " :" + message + "\r\n", target); 
+        }
+        catch(std::exception &e)
+        {
+            server.sendMessage("401 " + client.getNickname() + " PRIVMSG :The target don't exist\r\n", client);
+        }
+        return;
+    }
+    else
+    {
+        for(std::vector<std::string>::iterator it = targets.begin(); it != targets.end(); it++)
+        {
+            if (*(*it).begin() == '#' || *(*it).begin() == '&')
             {
-                server.sendMessage("403 " + client.getNickname() + " PRIVMSG :Channel don't exist\r\n", client);
-                continue;
-            }
-            (*it).erase((*it).begin());
-            try
-            {
-                Server::Channel &channel = ChannelMatch(server, *it);
-                    
-                if (!searchMembers(client.getNickname(), channel))
+                if ((*it).size() < 2)
                 {
-                    server.sendMessage("442 " + client.getNickname() + " PRIVMSG :You are not channel member\r\n", client);
+                    server.sendMessage("403 " + client.getNickname() + " PRIVMSG :Channel don't exist\r\n", client);
                     continue;
                 }
-                sendMessageAllClient(server, channel, host + "#" + channel.getName() + " :" + message);
+                (*it).erase((*it).begin());
+                try
+                {
+                    Server::Channel &channel = ChannelMatch(server, *it);
+                        
+                    if (!searchMembers(client.getNickname(), channel))
+                    {
+                        server.sendMessage("442 " + client.getNickname() + " PRIVMSG :You are not channel member\r\n", client);
+                        continue;
+                    }
+                    sendMessageAllClient(server, channel, host + "#" + channel.getName() + " :" + message);
+                }
+                catch(std::exception &e)
+                {
+                    server.sendMessage("403 " + client.getNickname() + " PRIVMSG :Channel(" + *it + ") don't exist\r\n", client);
+                }
             }
-            catch(std::exception &e)
+            else
             {
-                server.sendMessage("403 " + client.getNickname() + " PRIVMSG :Channel(" + *it + ") don't exist\r\n", client);
+                try
+                {
+                    Client &target = clientMatch(*it, server);
+                    
+                    server.sendMessage(host + target.getNickname() + " :" + message + "\r\n", target);
+                    server.sendMessage(host + target.getNickname() + " :" + message + "\r\n", client);
+                }
+                catch(std::exception &e)
+                {
+                    server.sendMessage("401 " + client.getNickname() + " PRIVMSG :The target(" + *it + ") don't exist\r\n", client);
+                }
             }
+            
         }
-        else
-        {
-            try
-            {
-                Client &target = clientMatch(*it, server);
-                
-                server.sendMessage(host + target.getNickname() + " :" + message + "\r\n", target);
-                server.sendMessage(host + target.getNickname() + " :" + message + "\r\n", client);
-            }
-            catch(std::exception &e)
-            {
-                server.sendMessage("401 " + client.getNickname() + " PRIVMSG :The target(" + *it + ") don't exist\r\n", client);
-            }
-        }
-        
     }
 }

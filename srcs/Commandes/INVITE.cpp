@@ -25,7 +25,7 @@ void execInvite(Client &client, Server &server, std::string tmp)
 
     while (ss >> w)
         words.push_back(w);
-    if (words.empty() || words.size() != 2 || words[1].size() < 2 || *words[1].begin() != '#')
+    if (words.empty() || words.size() != 2 || words[1].size() < 2 || (*words[1].begin() != '#' && *words[1].begin() != '&'))
     {
         server.sendMessage("461 " + client.getNickname() + " INVITE :Too many parameters\r\n", client);
         return ;
