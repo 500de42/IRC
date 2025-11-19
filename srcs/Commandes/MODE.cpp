@@ -31,16 +31,40 @@ void extractAndSetMode(Client &client, Server &server, std::string tmp)
         word.push_back(w);
     word.erase(word.begin());
 
-    if (word.empty() || word.size() < 2 || word[0].empty() || word[0].size() < 2 || (word[0][0] != '#' && word[0][0] != '&'))
+    if (word.empty()|| word[0].empty() || word[0].size() < 2 || (word[0][0] != '#' && word[0][0] != '&'))
     {
         server.sendMessage("461 " + client.getNickname() + " MODE :Not enough parameters\r\n", client);
         return;
     }
-
     word[0].erase(0, 1);
     try
     {
         Server::Channel &channel = ChannelMatch(server, word[0]);
+        if (word.size() == 1)
+        {
+            std::string actifMode, settings;
+
+            if (channel.getI())
+            {
+                actifMode += "i";
+            }
+            if (channel.getT())
+            {
+                actifMode += "t";
+            }
+            if (channel.getK())
+            {
+                actifMode += "k";
+                settings += " " + channel.getPass() + " ";
+            }
+            if (channel.getL())
+            {
+                actifMode += "l";
+                settings += channel.getMembersLimit();
+            }
+            server.sendMessage(":IRCSERVER 324 " + client.getNickname() + " #" + channel.getName() + " " + actifMode + settings + "\r\n", client);
+            return;
+        }
         if (client.getOp(channel.getName()) == false)
         {
             server.sendMessage("482 " + client.getNickname() + " #" + channel.getName() + " MODE :You're not channel operator\r\n", client);

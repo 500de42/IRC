@@ -36,7 +36,6 @@ void PRIVMSG(Server &server, Client &client, const char *tmp)
         try
         {
             Client &target = clientMatch(words[0], server);
-            std::cout << "envoie reussi\n";
             server.sendMessage("PRIVMSG " + target.getNickname() + " :" + message + "\r\n", target); 
         }
         catch(std::exception &e)

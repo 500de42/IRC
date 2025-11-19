@@ -103,13 +103,11 @@ void PING(Server &server, Client &client, char *buff)
 
     while (ss >> w)
         words.push_back(w);
-    std::cout << "buffer ping:" << buffer << words[1] << std::endl;
     if(words.size() != 2)
     {
         server.sendMessage("461 " + client.getNickname() + " PING :Not enough parameters\r\n", client);
         return ;
     }
-    std::cout << "buffer ping:" << buffer << words[1] << std::endl;
     server.sendMessage("PONG : " + words[1] + "\r\n", client);
 }
 
