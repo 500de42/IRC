@@ -43,7 +43,11 @@ void extractAndSetMode(Client &client, Server &server, std::string tmp)
         if (word.size() == 1)
         {
             std::string actifMode, settings;
-
+            if(!channel.getI() && !channel.getT() && !channel.getK() && !channel.getL())
+            {
+                server.sendMessage(":IRCSERVER 324 " + client.getNickname() + " #" + channel.getName() + " +\r\n", client);
+                return;
+            }
             if (channel.getI())
             {
                 actifMode += "i";

@@ -142,3 +142,14 @@ bool Server::Channel::hasBeenInvited(std::string Name)
         }
     return false;
 }
+
+void Server::Channel::setLastTopicTime(time_t time)
+{
+    lastTopicTime = time;
+}
+
+time_t &Server::Channel::getLastTopicTime()
+{
+    return lastTopicTime;
+}   
+

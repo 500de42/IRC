@@ -349,9 +349,24 @@ void welcomeChannelMessage(Server &server, Client  &client, Server::Channel &cha
 {
     time_t tt = time(NULL);
     if (!channel.getTopic().empty())
-        server.sendMessage(":IRCserver 332 " + client.getNickname() + " " + channel.getName() + ": " + channel.getTopic() + "\r\n", client);
-    server.sendMessage(":IRCSERVEUR 333 " + client.getNickname() + channel.getName() + " " + timeToString(tt) + "\r\n", client);    
-    std::string clientList;
+    {
+        server.sendMessage(":IRCserver 332 " + client.getNickname() + " " + channel.getName() + " :" + channel.getTopic() + "\r\n", client);
+        server.sendMessage(":IRCSERVEUR 333 " + client.getNickname() + channel.getName() + " " + timeToString(channel.getLastTopicTime()) + "\r\n", client);    
+    }
+    else
+    {
+        server.sendMessage(":IRCSERVEUR 331 " + client.getNickname() + channel.getName() + " " + timeToString(tt) + "\r\n", client);
+    }
+    std::string clientList = ":";
+    for(std::vector<Client *>::iterator it = channel.getMembers().begin(); it != channel.getMembers().end(); it++)
+    {
+        if ((*it)->getOp(channel.getName()))
+            clientList += "@" + (*it)->getNickname() + " ";
+        else
+            clientList += (*it)->getNickname() + " ";
+    }
+    clientList.erase(clientList.size() - 1);
+    std::cout << "list client " << clientList << std::endl;
     server.sendMessage(":IRCSERVEUR 353 " + client.getNickname() + " = #" + channel.getName() + " " + clientList +  "\r\n", client);
-    server.sendMessage(":IRCSERVEUR 366 " + client.getNickname() + channel.getName() + " :End of /NAMES list.\r\n", client);    
+    server.sendMessage(":IRCSERVEUR 366 " + client.getNickname() + " #" + channel.getName() + " :End of /NAMES list.\r\n", client);    
 }

@@ -38,6 +38,7 @@ class Server
 			bool i; // Définir/supprimer le canal sur invitation uniquement
 			bool o; // Donner/retirer le privilège de l’opérateur de canal
 			size_t membersLimit;
+			time_t lastTopicTime;
 
 		public:
 			//      GET         //
@@ -54,6 +55,7 @@ class Server
 			std::string 				&getLastTopicSetter();//a set
 			std::vector<Client *> 		&getMembers();
 			std::vector<std::string> 	&getInvitedMembers();
+			time_t 						&getLastTopicTime();
 
 			//      SET         //
 			void setK(bool active);
@@ -68,6 +70,7 @@ class Server
 			void setOffOperator(Client &client);
 			void setPasssword(const std::string &name);
 			void setOfMember(std::string name);
+			void setLastTopicTime(time_t time);
 			//		OTHERS		//
 			
 			bool hasBeenInvited(std::string name);

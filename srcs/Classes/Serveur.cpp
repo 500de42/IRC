@@ -46,7 +46,7 @@ void Server::addClientInChannel(Server::Channel &channel, Client  &client)
 {
     channel.getMembers().push_back(&client);
     client.getChannels().push_back(&channel);
-    welcomeMessage(*this, client);
+    welcomeChannelMessage(*this, client, channel);
 }
 
 std::vector<Client*> &Server::getClients()
