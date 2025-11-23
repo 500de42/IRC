@@ -1,3 +1,0 @@
-Expulser	            KICK <#nom_du_canal> <pseudo_utilisateur> [ :<raison> ]
-Exemple simple	        KICK #aide_irc MauvaisClient
-Exemple avec raison	    KICK #aide_irc MauvaisClient :Non-respect des règles de la charte.

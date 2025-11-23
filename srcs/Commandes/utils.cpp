@@ -366,7 +366,6 @@ void welcomeChannelMessage(Server &server, Client  &client, Server::Channel &cha
             clientList += (*it)->getNickname() + " ";
     }
     clientList.erase(clientList.size() - 1);
-    std::cout << "list client " << clientList << std::endl;
     server.sendMessage(":IRCSERVEUR 353 " + client.getNickname() + " = #" + channel.getName() + " " + clientList +  "\r\n", client);
     server.sendMessage(":IRCSERVEUR 366 " + client.getNickname() + " #" + channel.getName() + " :End of /NAMES list.\r\n", client);    
 }

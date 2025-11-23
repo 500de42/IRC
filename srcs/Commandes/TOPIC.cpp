@@ -25,6 +25,7 @@ void TOPIC(Server &server, Client &client, const char *tmp)
         {
             newTopic = buffer.substr(pos);
             newTopic.erase(0, 1);
+            std::cout << "new topic " << newTopic << std::endl;
         }
         else
         {
@@ -49,8 +50,9 @@ void TOPIC(Server &server, Client &client, const char *tmp)
                 server.sendMessage(":IRCSERVEUR 331 " + client.getNickname() + " " + channelName + ": No topic is set\r\n", client);
             else
             {
-                server.sendMessage(":IRCSERVEUR 332 " + client.getNickname() + " " + channelName + ": " + channel.getTopic() + "\r\n", client);
-                server.sendMessage(":IRCSERVEUR 333 " + client.getNickname() + channel.getName() + " " + timeToString(channel.getLastTopicTime()) + "\r\n", client);
+                std::cout << "topic " << channel.getTopic() << std::endl;
+                server.sendMessage(":IRCSERVEUR 332 " + client.getNickname() + " " + channelName + " :" + channel.getTopic() + "\r\n", client);
+                server.sendMessage(":IRCSERVEUR 333 " + client.getNickname() + " " + channel.getName() + " " + channel.getLastTopicSetter() + " " + timeToString(channel.getLastTopicTime()) + "\r\n", client);
             }
         }
         else
@@ -64,6 +66,7 @@ void TOPIC(Server &server, Client &client, const char *tmp)
                 channel.getTopic() = "";
             else
                 channel.getTopic() = newTopic;
+            std::cout << "topic " << channel.getTopic() << std::endl;
             std::string t(client.getNickname() + "!" + client.getUsername() +"@127.0.0.1 : TOPIC: #" + channel.getName() + ":");
             sendMessageAllClient(server, channel, t + newTopic);
             channel.setLastTopicTime(time(NULL));

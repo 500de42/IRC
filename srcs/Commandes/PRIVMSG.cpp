@@ -9,8 +9,8 @@ void PRIVMSG(Server &server, Client &client, const char *tmp)
     std::vector<std::string> words;
     std::string message;
     std::string w;
-    std::string host(":" + client.getNickname() + "!" + client.getUsername() +"@127.0.0.1 : PRIVMSG ");
-
+    std::string host(client.getNickname() + "!" + client.getUsername() +"@127.0.0.1");
+    std::cout << "host " << host << "nick "  << client.getNickname() << std::endl;
     while (ss >> w)
         words.push_back(w);
     if (words.empty() || words.size() < 2 )
@@ -18,7 +18,6 @@ void PRIVMSG(Server &server, Client &client, const char *tmp)
         server.sendMessage("461 " + client.getNickname() + " PRIVMSG :Not enough parameters\r\n", client);
         return ;
     }
-    std::cout << "words" << words[1] << std::endl;
     std::vector<std::string> targets = splitCommand(words[0], ',');
     int pos = buffer.find(':');
     if (pos != (int)std::string::npos)
@@ -65,7 +64,8 @@ void PRIVMSG(Server &server, Client &client, const char *tmp)
                         server.sendMessage("442 " + client.getNickname() + " PRIVMSG :You are not channel member\r\n", client);
                         continue;
                     }
-                    sendMessageAllClient(server, channel, host + "#" + channel.getName() + " :" + message);
+                    sendMessageAllClient(server, channel, host + " #" + channel.getName() + " :" + message);
+                    std::cout << "host " << host << "nick "  << client.getNickname() << std::endl;
                 }
                 catch(std::exception &e)
                 {
@@ -77,9 +77,11 @@ void PRIVMSG(Server &server, Client &client, const char *tmp)
                 try
                 {
                     Client &target = clientMatch(*it, server);
-                    
-                    server.sendMessage(host + target.getNickname() + " :" + message + "\r\n", target);
-                    server.sendMessage(host + target.getNickname() + " :" + message + "\r\n", client);
+                    std::string fullMsg = host + " PRIVMSG " + target.getNickname() + " :" + message + "\r\n";;
+                    std::cout << "host " << fullMsg << "nick "  << client.getNickname()  << "target nick " << target.getNickname() << std::endl;
+                    std::cout << "test aff " << fullMsg<< std::endl;
+                    server.sendMessage(fullMsg, target);
+                    server.sendMessage(fullMsg, client);
                 }
                 catch(std::exception &e)
                 {
