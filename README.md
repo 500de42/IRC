@@ -201,14 +201,6 @@ Vérifiez :
 ### Les messages ne s'affichent pas
 Vérifiez que vous avez rejoint le même canal avec `JOIN #canalname`.
 
-## 📝 Licence
-
-Projet éducatif.
-
 ## 👤 Auteur
 
 Développé comme projet d'apprentissage de la gestion d'un serveur réseau en C++.
-
----
-
-**Besoin d'aide ?** Consultez le code source ou les commentaires dans les fichiers.
