@@ -351,11 +351,11 @@ void welcomeChannelMessage(Server &server, Client  &client, Server::Channel &cha
     if (!channel.getTopic().empty())
     {
         server.sendMessage(":IRCserver 332 " + client.getNickname() + " " + channel.getName() + " :" + channel.getTopic() + "\r\n", client);
-        server.sendMessage(":IRCSERVEUR 333 " + client.getNickname() + channel.getName() + " " + timeToString(channel.getLastTopicTime()) + "\r\n", client);    
+        server.sendMessage(":IRCSERVEUR 333 " + client.getNickname() + " " + channel.getName() + " " + timeToString(channel.getLastTopicTime()) + "\r\n", client);    
     }
     else
     {
-        server.sendMessage(":IRCSERVEUR 331 " + client.getNickname() + channel.getName() + " " + timeToString(tt) + "\r\n", client);
+        server.sendMessage(":IRCSERVEUR 331 " + client.getNickname() + " " + channel.getName() + " " + timeToString(tt) + "\r\n", client);
     }
     std::string clientList = ":";
     for(std::vector<Client *>::iterator it = channel.getMembers().begin(); it != channel.getMembers().end(); it++)

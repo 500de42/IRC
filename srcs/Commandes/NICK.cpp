@@ -15,6 +15,8 @@ void NICK(Server &server, Client &client, const char *tmp)
         server.sendMessage("461 " + client.getNickname() + " NICK :Not enough parameters\r\n", client);
         return;
     }
+    if (words[1] == client.getNickname())
+        return;
     if (!server.checkDoubleName(words[1].c_str()))
     {        
         server.sendMessage(":IRCSERVER 433 " + client.getNickname() + words[1] + " :Nickname is already in use.\r\n", client);

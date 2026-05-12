@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <sys/signal.h>
 #include <csignal>
+#include <cctype>
 
 volatile sig_atomic_t g_running = 1;
 
@@ -59,9 +60,17 @@ class Bot
             return std::string(buf);
         }
 
+        std::string toLowerStr(const std::string &input)
+        {
+            std::string out = input;
+            for (size_t i = 0; i < out.length(); i++)
+                out[i] = static_cast<char>(tolower(static_cast<unsigned char>(out[i])));
+            return out;
+        }
+
     public:
-        Bot(std::string srv, int p, std::string pw, std::string n, std::string ch)
-            : server(srv), port(p), pass(pw), nick(n), channel(ch), sock(-1) {}
+        Bot(std::string srv, int p, std::string pw, std::string n)
+            : server(srv), port(p), pass(pw), nick(n), channel("#timebot"), sock(-1) {}
 
         bool connect()
         {
@@ -106,9 +115,8 @@ class Bot
         void run()
         {
             char buffer[512];
+            std::string recvBuffer;
             time_t lastUpdate = time(0);
-
-            sendMsg("PRIVMSG " + channel + " :Hello! Ask me about time or date");
 
             while (g_running)
             {
@@ -117,37 +125,72 @@ class Bot
                 
                 if (n > 0)
                 {
-                    std::string msg(buffer);
-                    std::cout << "<< " << msg;
+                    std::string chunk(buffer, n);
+                    std::cout << "<< " << chunk;
 
-                    if (msg.find("PING") == 0)
+                    recvBuffer += chunk;
+                    size_t eol = 0;
+                    while ((eol = recvBuffer.find("\r\n")) != std::string::npos)
                     {
-                        std::string pong = msg;
-                        size_t pos = pong.find("PING");
-                        pong.replace(pos, 4, "PONG");
-                        sendMsg(pong.substr(0, pong.find("\r\n")));
-                    }
+                        std::string line = recvBuffer.substr(0, eol);
+                        recvBuffer.erase(0, eol + 2);
 
-                    if (msg.find("PRIVMSG") != std::string::npos && 
-                        msg.find(channel) != std::string::npos)
-                    {
-                        std::string lower = msg;
-                        for (size_t i = 0; i < lower.length(); i++)
-                            lower[i] = tolower(lower[i]);
+                        if (line.empty())
+                            continue;
 
-                        if (lower.find("time") != std::string::npos)
+                        if (line.find("PING") == 0)
                         {
-                            sendMsg("PRIVMSG " + channel + " :Current time: " + getTime());
+                            sendMsg("PONG" + line.substr(4));
+                            continue;
                         }
-                        if (lower.find("date") != std::string::npos)
+
+                        size_t privmsgPos = line.find(" PRIVMSG ");
+                        if (privmsgPos == std::string::npos)
+                            continue;
+
+                        size_t targetStart = privmsgPos + 9;
+                        size_t targetEnd = line.find(' ', targetStart);
+                        if (targetEnd == std::string::npos)
+                            continue;
+
+                        std::string target = line.substr(targetStart, targetEnd - targetStart);
+                        if (target != channel && target != nick)
+                            continue;
+
+                        size_t textPos = line.find(" :", targetEnd);
+                        if (textPos == std::string::npos)
+                            continue;
+
+                        std::string senderNick;
+                        if (!line.empty() && line[0] == ':')
                         {
-                            sendMsg("PRIVMSG " + channel + " :Date: " + getDate());
+                            size_t exclPos = line.find('!');
+                            if (exclPos != std::string::npos && exclPos > 1)
+                                senderNick = line.substr(1, exclPos - 1);
                         }
+                        if (senderNick == nick)
+                            continue;
+
+                        std::string text = toLowerStr(line.substr(textPos + 2));
+                        std::string replyTarget = channel;
+                        if (target == nick && !senderNick.empty())
+                            replyTarget = senderNick;
+
+                        if (text.find("time") != std::string::npos ||
+                            text.find("!time") != std::string::npos ||
+                            text.find("heure") != std::string::npos)
+                            sendMsg("PRIVMSG " + replyTarget + " :Current time: " + getTime());
+                        if (text.find("date") != std::string::npos ||
+                            text.find("!date") != std::string::npos)
+                            sendMsg("PRIVMSG " + replyTarget + " :Date: " + getDate());
                     }
                 }
                 else if(n == 0)
+                {
                     if (sock >= 0)
                         close(sock);
+                    break;
+                }
 
                 time_t now = time(0);
                 if (now - lastUpdate >= 300)
@@ -181,7 +224,7 @@ int main(int ac, char **av)
 {
 	if (ac < 3)
 	{
-		std::cerr << "Usage: " << av[0] << " <port> <password> [nick] [channel]\n";
+        std::cerr << "Usage: " << av[0] << " <port> <password> [nick]\n";
 		return 1;
 	}
 
@@ -189,9 +232,8 @@ int main(int ac, char **av)
 	int port = atoi(av[1]);
 	std::string pass = av[2];
 	std::string nick = (ac > 3) ? av[3] : "TimeBot";
-	std::string channel = (ac > 4) ? av[4] : "#timebot";
 
-	Bot bot(server, port, pass, nick, channel);
+    Bot bot(server, port, pass, nick);
 	
 	if (!bot.connect())
 		return 1;

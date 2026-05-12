@@ -76,7 +76,7 @@ bool Server::checkDoubleName(const char *name)
         return true;
     for(size_t i = 0; i < this->getClients().size(); i++)
     {
-        if (name == this->getClients()[i]->getUsername())
+        if (this->getClients()[i]->getNickname() == name)
             return false;
     }
     return true;
